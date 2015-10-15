@@ -1,0 +1,797 @@
+/*-------------------------------------------------------------------------------------------------
+ Lithium: the most rad php framework
+
+ @copyright     Copyright 2009, Union of RAD (http://union-of-rad.org)
+ @license       http://opensource.org/licenses/bsd-license.php The BSD License
+ -------------------------------------------------------------------------------------------------*/
+
+/*--- Reset ---*/
+* {
+	margin: 0;
+	padding: 0;
+}
+html, body {
+	height: 100%;
+	min-height: 100%;
+}
+
+/*--- Layout ---*/
+body {
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 11px;
+	line-height: 1.5em;
+	color: #0d0d0d;
+	background-color: #fff;
+	padding: 0 10px;
+}
+#container {
+	position: relative;
+	padding: 0 0;
+}
+
+/*--- Basics ---*/
+h1, h2, h3, h4, h5, h6 {
+	font-weight: normal;
+	color: #111;
+	line-height: 1;
+	margin: 1.5em 0 0.5em 0;
+}
+h1 {
+	font-size: 2.6em;
+}
+h2, h5 {
+	font-size: 2em;
+	color: #666;
+}
+h3, h6 {
+	font-size: 1.7em;
+	color: #00a8e6;
+}
+h4 {
+	font-size: 1.4em;
+}
+h5 {
+	font-size: 1.2em;
+}
+h6 {
+	font-size: 1em;
+}
+p {
+	margin-bottom: 1em;
+}
+strong {
+	font-weight: bold;
+}
+em {
+	font-style: italic;
+}
+a {
+	text-decoration: none;
+	color: #666;
+}
+a, h1 a, h2 a {
+	text-decoration: none;
+}
+a:hover {
+	color: #00bbff;
+}
+a:visited:hover {
+	color: #ff59ff;
+}
+a img {
+	border: none;
+}
+::-moz-selection {
+	background: #ff59ff;
+	color: #fff;
+}
+/*--- Code ---*/
+pre > code {
+	display: block;
+	color: white;
+	background: #141414;
+	border: 1px solid white;
+	padding: 1em !important; /* remove if base important is removed, too */
+	overflow: auto;
+	font-size: .9em;
+}
+a code {
+	background: transparent;
+	border: 0;
+}
+a:hover code {
+	color: inherit;
+}
+code, pre, .fixed {
+	font-family: Monaco, Courier, monospace !important;
+	font-weight: normal;
+	font-size: 0.85em;
+	white-space: pre;
+}
+code {
+	padding: .2em .25em !important;
+	border: 1px solid #F0F0F0;
+	background: #FAFAFA;
+}
+pre {
+	background: none;
+	padding: 0 0 .5em 0 !important;
+}
+
+/*--- Lists ---*/
+li ul, li ol {
+	margin: 0;
+}
+ul, ol {
+	margin: 0 0 1em 2.75em;
+}
+dt, dd {
+	font-style: italic;
+	margin: .5em 0;
+}
+dt {
+	font-weight: bold;
+}
+dd {
+	margin-left: 1em;
+}
+/*--- Header ---*/
+
+/*--- Tables ---*/
+table {
+	clear: both;
+	width: 100%;
+	border-collapse: collapse;
+	border-spacing: 0;
+	border: 1px solid #e6e6e6;
+	background: #fafafa;
+	margin: 12px 0;
+}
+td, th {
+	padding: .25em 1em;
+	border: 1px solid #e6e6e6;
+	vertical-align: middle;
+	text-align: left;
+	font-weight: normal;
+	color: #666;
+	font-size: 0.85em;
+}
+tr:nth-child(even) {
+	background: #fff;
+}
+thead th, tfoot td {
+	background: #f3f3f3;
+	color: #333;
+	text-align: left;
+	font-size: 1em;
+	font-weight: bold;
+	padding: .5em .75em;
+}
+/*--- Forms ---*/
+form {
+	display: block;
+	clear: both;
+	background: #fafafa;
+	padding: 1em 2em 2em 2em;
+	border: 1px solid #e6e6e6;
+}
+fieldset {
+	padding: 2em;
+	margin: 0 0 1em 0;
+	border: 1px solid #e6e6e6;
+	background: #f3f3f3;
+}
+legend {
+	padding: .5em 1em;
+	border: 1px solid #e6e6e6;
+	background: #fff;
+	font-size: 22px;
+}
+label {
+	padding: 0 1em 0 0;
+	color: #454545;
+	font-weight: normal;
+}
+input, textarea, button {
+	font-family: Helvetica, Arial, sans-serif;
+	padding: 2px 4px;
+	border: 1px solid #e5e5e5;
+	color: #454545;
+	font-size: 1em;
+	line-height: 1.25em;
+}
+input[type=text], input[type=password], input[type=submit], input[type=file], textarea {
+	clear: both;
+	display: block;
+	padding: .25em .5em;
+}
+input[type=text], input[type=password], input[type=file], textarea {
+
+	max-width: 950px;
+	margin: 0em 0 1em 0;
+	padding: .5em;
+}
+input[type=submit], input[type=button], input[type=reset], button {
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	padding: .5em 1em;
+	margin: 0 .75em 0 0;
+	background-color: white;
+	color: black !important;
+	border: 1px solid #e5e5e5 !important;
+	cursor: pointer;
+}
+select {
+	clear: both;
+	display: block;
+	margin: .5em 0 1em 0;
+	vertical-align: middle;
+	padding: 0.5em 0.5em 0.5em 0;
+	height: 34px;
+}
+option {
+	padding: 0.25em 0.5em 0.5em;
+}
+div.checkbox {
+	clear: both;
+	padding: 1em 0;
+}
+.checkbox label {
+	display: inline;
+}
+div input[type="checkbox"] {
+	display:inline-block;
+}
+input[type=submit] {
+	margin: 1em inherit;
+	border: none;
+	color: #000;
+	font-size: 16px;
+	font-weight: bold;
+}
+input[type=text]:focus, input[type=password]:focus, textarea:focus, select:focus {
+	border-color: #00a8e6;
+	outline: none;
+}
+
+/*--- Misc ---*/
+hr {
+	border: none;
+	height: 0;
+	border-bottom: 1px solid #e6e6e6;
+	margin: 1em 0;
+}
+sup, sub {
+	color: #666;
+	font-size: .65em;
+}
+acronym {
+	font-weight: bold;
+	font-style: italic;
+	color: #333;
+}
+abbr {
+	color: #333;
+}
+
+blockquote {
+	padding: 0.15em .5em;
+	margin: 0.5em 0;
+	font-size: 2em;
+	color: #666;
+	display: block;
+	font-style: italic;
+}
+
+blockquote:before, blockquote:after {
+	display: inline;
+	color: #e5e5e5;
+	font-size: 3em;
+	position: relative;
+	top: 0.25em;
+	left: -0.1em;
+}
+
+blockquote:before {
+	content: '\D \201C';
+}
+
+blockquote:after {
+	content: '\201D';
+}
+
+/*--- Shadows ---*/
+code {
+	-moz-box-shadow: 0 0 3px rgba(0,0,0,.1);
+	-webkit-box-shadow: 0 0 3px rgba(0,0,0,.1);
+	box-shadow: 0 0 3px rgba(0,0,0,.1);
+	color: #666;
+}
+table, form, pre > code {
+	margin-top: 0px;
+	margin-bottom: 12px;
+}
+table, form, pre > code, .shadow {
+	-moz-box-shadow: 2px 2px 12px rgba(0,0,0,.15);
+	-webkit-box-shadow: 2px 2px 12px rgba(0,0,0,0.15);
+	box-shadow: 2px 2px 12px rgba(0,0,0,.15);
+}
+table, form, pre > code, .no-shadow {
+	-moz-box-shadow: 0px 0px 0px rgba(0,0,0,.15);
+	-webkit-box-shadow: 0px 0px 0px rgba(0,0,0,0.15);
+	box-shadow: 0px 0px 0px rgba(0,0,0,.15);
+	border: 0px;
+	margin-bottom: 8px;
+}
+img.shadow {
+	border: 1px solid rgba(255,255,255,.15);
+}
+input[type=submit], input[type=button], input[type=reset], input[type=file], button {
+	-moz-box-shadow: 0 0 6px rgba(0,0,0,.1);
+	-webkit-box-shadow: 0 0 6px rgba(0,0,0,.1);
+	box-shadow: 0 0 6px rgba(0,0,0,.1);
+}
+input[type=submit]:hover, input[type=button]:hover, input[type=reset]:hover, button:hover {
+	-moz-box-shadow: inset 0 0 6px rgba(0,0,0,.15);
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.15);
+	box-shadow: inset 0 0 6px rgba(0,0,0,.15);
+}
+input, textarea {
+	-moz-box-shadow: inset 0 0 3px rgba(0,0,0,.1);
+	-webkit-box-shadow: inset 0 0 3px rgba(0,0,0,.1);
+	box-shadow: inset 0 0 3px rgba(0,0,0,.1);
+}
+input:-moz-placeholder, select:-moz-placeholder, textarea:-moz-placeholder {
+	color: #BBB;
+}
+
+/*--- Custom code ---*/
+
+.error-msg {
+	position: absolute;
+	top: 25px;
+	right: 10px;
+	width: 150px;
+}
+
+.user_login {
+	position: absolute;
+	top: 5px;
+	right: 5%;
+}
+
+/*.user_login div{
+ display: inline-block;
+ text-align: right;
+ padding: 2px 10px 0px;
+ color: #666666;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ border: 1px solid #ccc;
+ padding: 6px 6px;
+ border-radius: 5px;
+ }*/
+
+table#users_table td a {
+	display: block;
+}
+.view-label {
+	display: inline-block;
+	width: 150px;
+	text-align: right;
+	margin-right: 15px;
+	font-style: oblique;
+}
+.view-data {
+	display: inline-block;
+}
+#user-view {
+	padding: 15px 20px;
+	background: none repeat scroll 0 0 #FAFAFA
+}
+.left-form {
+	display: inline-block;
+	width: 510px;
+}
+.right-form {
+	display: inline-block;
+	width: 400px;
+	vertical-align: top;
+}
+.button {
+	border: 1px outset #ccc;
+	padding: 6px 6px;
+	border-radius: 5px;
+	margin-left: 20px;
+	margin-top: -6px;
+	display: block
+}
+.button:active {
+	border: 1px inset #ccc;
+	padding: 6px 6px;
+	border-radius: 5px;
+	margin-left: 20px;
+	margin-top: -6px;
+}
+.button a {
+
+}
+.button a:hover {
+	text-decoration: none;
+	color: #0d0d0d;
+}
+
+#left-bar {
+	/*position:fixed;
+	 left:0px;
+	 top:0px;
+	 bottom: 0px;
+	 width: 210px;
+	 background:#212121;
+	 color:#E6E6E6;
+	 padding: 10px 15px;
+	 background: #111;*/
+}
+
+#left-bar h1.logo {
+	color: #E6E6E6;
+	display: inline-block;
+	margin: 0.2em 0em;
+}
+
+#left-bar h4.sub-logo {
+	color: #A6A6A6;
+	display: inline-block;
+	font-size: smaller;
+}
+
+#left-bar h4, #left-bar a {
+	color: #E6E6E6;
+}
+
+#left-bar ul {
+	padding: 5px 2px;
+	margin: 0 0;
+}
+
+#left-bar ul li {
+	list-style: none;
+}
+
+.status {
+	position: absolute;
+	top: 2.3em;
+	right: 5%;
+	padding: 7px 15px;
+	border-radius: 15px;
+	background: #fff;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.status.goedgekeurd {
+	border-color: #008000;
+	color: #008000;
+}
+.status.afgekeurd {
+	border-color: #AA0000;
+	color: #AA0000;
+}
+
+.add-button {
+	position: absolute;
+	right: 7%;
+	top: 35px;
+	font-size: larger;
+	font-weight: bold;
+}
+
+.werkaanvraag-geg {
+	position: relative;
+}
+
+.edit-article {
+	position: absolute;
+	top: 5px;
+	right: 3%;
+}
+
+.edit-user {
+	position: absolute;
+	right: 7%;
+	top: 15px
+}
+
+#goedkeuringsvenster {
+	position: absolute;
+	top: 4.3em;
+	right: 5%;
+	padding: 7px 15px;
+	border-radius: 15px;
+	border-top-right-radius: 0px;
+	background: #fff;
+	z-index: 5;
+	display: none;
+	max-width: 500px;
+	left: auto;
+}
+
+#werkaanvraag-title {
+	font-weight: normal;
+	color: #111;
+	line-height: 1;
+	margin: 0.5em 6% 0.5em 0%;
+	font-size: 2em;
+	color: #666;
+}
+
+#werkaanvraag_bewerken_form {
+	display: none;
+	box-shadow: 0 0;
+	margin: 0 0;
+	padding: 0 0;
+	border: 0px;
+}
+
+#cke_WerkaanvragenWerkaanvraag, #cke_SoftwareBeschrijving {
+	margin-top: 10px
+}
+
+.progress {
+	position: relative;
+	width: 400px;
+	border: 1px solid #ddd;
+	padding: 1px;
+	border-radius: 3px;
+	margin-top: 28px
+}
+.bar {
+	background: -moz-linear-gradient(left, #3A881F, #7CFF5D);
+	width: 0%;
+	height: 20px;
+	border-radius: 3px;
+	padding: 5px
+}
+.percent {
+	position: absolute;
+	display: inline-block;
+	top: 3px;
+	left: 48%;
+}
+.software {
+	border: 1px solid #AAA;
+	border-radius: 9px;
+	box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.15);
+	display: inline-block;
+	height: 200px;
+	margin: 5px 10px;
+	padding: 8px 8px;
+	vertical-align: top;
+	width: 200px;
+}
+.software .label {
+	font-size: small;
+	font-weight: bold;
+}
+.software .item {
+	margin-left: 6px;
+}
+.software .naam {
+	font-size: larger;
+	font-weight: bold;
+	margin: 5px 0px;
+}
+ul#werknemers {
+	list-style: none;
+	margin: 0 0;
+}
+ul#werknemers li {
+	padding: 4px 4px;
+	margin: 4px 0;
+	cursor: move;
+	position: relative
+}
+ul#werknemers li .icon-remove-sign {
+	position: absolute;
+	right: 5px;
+	top: 6px;
+	cursor: pointer
+}
+ul#werknemers li .icon-pencil {
+	position: absolute;
+	right: 23px;
+	top: 6px;
+	cursor: pointer
+}
+ul#werknemers li .icon-info-sign {
+	position: absolute;
+	right: 43px;
+	top: 6px;
+	cursor: pointer
+}
+td .element {
+	padding: 1px 0px;
+	margin: 4px;
+	cursor: move;
+}
+td .element .icon-remove-sign {
+	float:right;
+	right: 5px;
+	margin-top: 2px;
+	cursor: pointer
+}
+td .icon-plus {
+	cursor: pointer
+}
+#wn_form {
+	margin-left: 0px;
+	background: inherit;
+}
+form#wn_form {
+	padding: 0 0
+}
+.permanentie-tabel th, .permanentie-tabel td {
+	padding: 0.3em 0.2em
+}
+body .navbar {
+	margin-bottom: 0px;
+}
+.hidden {
+	display: none;
+}
+td.naam {
+	vertical-align: top;
+}
+ul#werknemers li.highlight, #permanentie_tabel tbody tr td.highlight, #permanentie_tabel tbody tr.highlight, .highlight {
+	background-color: #FBCA93;	
+}
+ul#werknemers li.highlight2, #permanentie_tabel tbody tr td.highlight2, #permanentie_tabel tbody tr.highlight2, .highlight2 {
+	background-color: rgb(180,216,233);	
+}
+td div.element
+{
+	padding: 2px 3px;
+	border-radius: 3px;
+}
+
+@media (min-height: 500px) {
+	#scrollbar1 .viewport {
+		height: 325px;
+		overflow: hidden;
+		position: relative;
+	}
+
+}
+@media (min-height: 550px) {
+	#scrollbar1 .viewport {
+		height: 425px;
+		overflow: hidden;
+		position: relative;
+	}
+}
+@media (min-height: 600px) {
+	#scrollbar1 .viewport {
+		height: 475px;
+		overflow: hidden;
+		position: relative;
+	}
+}
+@media (min-height: 650px) {
+	#scrollbar1 .viewport {
+		height: 525px;
+		overflow: hidden;
+		position: relative;
+	}
+}
+@media (min-height: 700px) {
+	#scrollbar1 .viewport {
+		height: 575px;
+		overflow: hidden;
+		position: relative;
+	}
+}
+@media (min-height: 750px) {
+	#scrollbar1 .viewport {
+		height: 625px;
+		overflow: hidden;
+		position: relative;
+	}
+}
+@media (min-height: 800px) {
+	#scrollbar1 .viewport {
+		height: 675px;
+		overflow: hidden;
+		position: relative;
+	}
+}
+@media (min-height: 850px) {
+	#scrollbar1 .viewport {
+		height: 725px;
+		overflow: hidden;
+		position: relative;
+	}
+}
+@media (min-height: 900px) {
+	#scrollbar1 .viewport {
+		height: 775px;
+		overflow: hidden;
+		position: relative;
+	}
+}
+@media (min-height: 1000px) {
+	#scrollbar1 .viewport {
+		height: 875px;
+		overflow: hidden;
+		position: relative;
+	}
+}
+@media (min-height: 1100px) {
+	#scrollbar1 .viewport {
+		height: 975px;
+		overflow: hidden;
+		position: relative;
+	}
+}
+
+#scrollbar1 {
+	width: 240px;
+	clear: both;
+	margin: 0px 0 10px;
+	padding: 3px 3px;
+	min-height: 600px;
+	box-shadow: 3px 2px rgba(0,0,0,0.1);
+	border-radius: 5px
+}
+#scrollbar1 .viewport {
+	width: 220px;
+}
+#scrollbar1 .overview {
+	list-style: none;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 220px
+}
+#scrollbar1 .thumb .end, #scrollbar1 .thumb {
+	background-color: #999;
+	border-radius: 5px
+}
+#scrollbar1 .scrollbar {
+	position: relative;
+	float: right;
+	width: 10px;
+}
+#scrollbar1 .track {
+	background-color: #ccc;
+	height: 100%;
+	width: 10px;
+	position: relative;
+	padding: 0 1px;
+	border-radius: 15px
+}
+#scrollbar1 .thumb {
+	height: 20px;
+	width: 10px;
+	cursor: pointer;
+	overflow: hidden;
+	position: absolute;
+	top: 0;
+}
+#scrollbar1 .thumb .end {
+	overflow: hidden;
+	height: 5px;
+	width: 10px;
+}
+#scrollbar1 .disable {
+	display: none;
+}
+
+
+.noSelect {
+	user-select: none;
+	-o-user-select: none;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+}
