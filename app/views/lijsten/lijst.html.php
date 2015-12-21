@@ -1,4 +1,4 @@
-<!--[if lt IE 10 ]>
+﻿<!--[if lt IE 10 ]>
 		<script>
 		var is_ie_lt10 = true;
 		alert('Dit werkt enkel in Mozilla Firefox of Google Chrome!');
@@ -33,7 +33,7 @@
 			<?php if ($lijsten->type == "calamiteiten" && $lijsten->subtype == "leidinggevenden"){?>   
 				<h4>Beurtrol <?=$lijsten->subtype?> <?=$lijsten->type?> wachtdienst (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
 			<?php } else if ($lijsten->subtype == 'provinciaal') {?>
-				<h4>Beurtrol Provinciaal Coördinator (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
+				<h4>Beurtrol Provinciaal CoÃ¶rdinator (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
 			<?php } else if ($lijsten->subtype == 'EM') {?>
 				<h4>Beurtrol Permanentie Sectie EM (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
 			<?php } else { ?>
@@ -87,12 +87,8 @@
 							}
 							$year = date('Y',$lijsten->Startdatum->sec);
 				    		$i = date('W', $lijsten->Startdatum->sec);
-				    		if ($i == $eind_week)
-				    		{
-				    			$eind_week--;
-				    		}
 				    		
-				    		foreach ($lijsten_arr['permanentie'][0] as $test){
+				    		foreach ($lijsten_arr['permanentie'] as $test){
 				    			if ($i <=9) {
 				    				$digit = '0';
 				    			} else {
@@ -100,8 +96,8 @@
 				    			}
 								$y = $i;
 								$y++;
-								usort($lijsten_arr['permanentie'][0]['week_'.$i], "cmp");
-								foreach ($lijsten_arr['permanentie'][0]['week_'.$i] as $key => $value){
+								usort($lijsten_arr['permanentie']['week_'.$i], "cmp");
+								foreach ($lijsten_arr['permanentie']['week_'.$i] as $key => $value){
 									asort($value);
 									echo '<tr id="week_'.$i.'_'.$key.'">';
 									if($key==0){
@@ -119,12 +115,12 @@
 												</div>';
 										echo '<td class="week"></td>';
 									}							
-									echo '<td class="van">'.date('d/m/Y', $lijsten_arr['permanentie'][0]['week_'.$i][$key]['startdatum']).'</td>';
-									echo '<td class="tot">'.date('d/m/Y',$lijsten_arr['permanentie'][0]['week_'.$i][$key]['einddatum']).'</td>';
+									echo '<td class="van">'.date('d/m/Y', $lijsten_arr['permanentie']['week_'.$i][$key]['startdatum']).'</td>';
+									echo '<td class="tot">'.date('d/m/Y',$lijsten_arr['permanentie']['week_'.$i][$key]['einddatum']).'</td>';
 									if ($lijsten->subtype == "leidinggevenden" || $lijsten->subtype == "provinciaal" || $lijsten->subtype == "EM"){
-										if (array_key_exists('personeelslid', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
+										if (array_key_exists('personeelslid', $lijsten_arr['permanentie']['week_'.$i][$key])){
 											$list_data = array('naam' => '', 'GSM' => '');
-											foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['personeelslid'] as $number){			
+											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['personeelslid'] as $number){			
 												if(isset($number['naam'])){
 													$list_data['naam'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span><div class="hidden GSM">'.$number['GSM'].'</div></div>';
 													$list_data['GSM'] .= '<div class="element GSM_element">'.$number['GSM'].'</div>';
@@ -136,15 +132,15 @@
 										}																	
 									} else if ($lijsten->type == "calamiteiten") {
 										$list_data = array('medewerker' => '', 'arbeider' => '');
-										if (array_key_exists('arbeider', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-											foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['arbeider'] as $number){			
+										if (array_key_exists('arbeider', $lijsten_arr['permanentie']['week_'.$i][$key])){
+											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['arbeider'] as $number){			
 												if(isset($number['naam'])){
 													$list_data['arbeider'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span></div>';												
 												} 
 											}
 										}
-										if (array_key_exists('medewerker', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-											foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['medewerker'] as $number){
+										if (array_key_exists('medewerker', $lijsten_arr['permanentie']['week_'.$i][$key])){
+											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['medewerker'] as $number){
 												if(isset($number['naam'])){
 													$list_data['medewerker'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span></div>';												
 												} 												
@@ -153,29 +149,29 @@
 										echo '<td class="medewerker dropable">'.$list_data['medewerker'].'</td><td class="arbeider dropable">'.$list_data['arbeider'].'</td><td>'.$button.'</td></tr>';																			
 									} else {
 										$list_data = array('wegentoezichters-vroeg' => '', 'wegentoezichters-laat' => '', 'arbeiders-vroeg' => '', 'arbeiders-laat' => '');
-										if (array_key_exists('arbeiders-vroeg', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-											foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['arbeiders-vroeg'] as $number){			
+										if (array_key_exists('arbeiders-vroeg', $lijsten_arr['permanentie']['week_'.$i][$key])){
+											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['arbeiders-vroeg'] as $number){			
 												if(isset($number['naam'])){
 													$list_data['arbeiders-vroeg'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span></div>';												
 												} 
 											}
 										}
-										if(array_key_exists('arbeiders-laat', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-											foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['arbeiders-laat'] as $number){			
+										if(array_key_exists('arbeiders-laat', $lijsten_arr['permanentie']['week_'.$i][$key])){
+											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['arbeiders-laat'] as $number){			
 												if(isset($number['naam'])){
 													$list_data['arbeiders-laat'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span></div>';												
 												} 
 											}
 										}
-										if (array_key_exists('wegentoezichters-vroeg', $lijsten_arr['permanentie'][0]['week_'.$i][$key])) {
-											foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['wegentoezichters-vroeg'] as $number){
+										if (array_key_exists('wegentoezichters-vroeg', $lijsten_arr['permanentie']['week_'.$i][$key])) {
+											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['wegentoezichters-vroeg'] as $number){
 												if(isset($number['naam'])){
 													$list_data['wegentoezichters-vroeg'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span></div>';												
 												} 												
 											}
 										}
-										if (array_key_exists('wegentoezichters-laat', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-											foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['wegentoezichters-laat'] as $number){
+										if (array_key_exists('wegentoezichters-laat', $lijsten_arr['permanentie']['week_'.$i][$key])){
+											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['wegentoezichters-laat'] as $number){
 												if(isset($number['naam'])){
 													$list_data['wegentoezichters-laat'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span></div>';												
 												} 												
@@ -254,7 +250,7 @@
 		    	<p>
 		    		<form id="week_add_form" action="permanentie_week_add/<?=$lijsten->_id?>">
 				    	<label for="naam">Tussendatum tussen (<span id="begin_datum_min"></span> en <span id="eind_datum_max"></span>)</label>
-						<input type="text" id="tussendatum" placeholder="tussendatum toevoegen" name="naam" val="">
+						<input type="text" id="tussendatum" required="true" placeholder="tussendatum toevoegen" name="naam" val="" >
 						<input type="hidden" id="week" name="week" val="">
 						<input type="hidden" id="begin_datum" name="week" val="">
 						<input type="hidden" id="eind_datum" name="week" val="">

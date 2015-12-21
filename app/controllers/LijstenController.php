@@ -13,7 +13,7 @@ class lijstenController extends \lithium\action\Controller {
         $this->_render['negotiate'] = true;
         parent::_init();
 		$login = Auth::check('member');
-		self::$actief = array('start' => '', 'lijsten' => 'active', 'beheren' => '');
+		self::$actief = array('start' => '', 'overzicht' => '', 'lijsten' => 'active', 'beheren' => '');
 		self::$breadcrumb = array(array('url' => '/permanentielijsten/lijsten', 'naam' => 'Lijsten'));
 			
     }
@@ -90,6 +90,35 @@ class lijstenController extends \lithium\action\Controller {
 		return compact('login','actief', 'breadcrumb', 'calamiteiten', 'winterdienst', 'locaties', 'year');
 	}
 
+    public function overzicht($date = '', $provincie = '', $district = ''){
+        $login = Auth::check('member');     
+        
+        if ($date == ''){
+            $date =  new \MongoDate(strtotime(date('Y-m-d')));
+        }
+        $lijsten = Lijsten::find('all', array('conditions' =>  array('Startdatum' => array('$lte' => $date), 'Einddatum' => array('$gte' => $date)), 'order' => array('provincie' => 'ASC', 'districtscode' => 'ASC')));
+        $lijsten = $lijsten->data();
+        
+       
+        $locations = Locations::find('all', array('order' => array('district' => 'ASC')));
+        $actief = array('start' => '', 'overzicht' => 'active', 'lijsten' => '', 'beheren' => '');;        
+        foreach ($locations as $key => $location){
+            $provincie = $locations[$key]['provincie'];
+            $district = $locations[$key]['district'];
+            $districtnummer = $locations[$key]['districtnummer'];
+            if($login['rol'] != 'administrator'){
+                if ($provincie == $login['location']){                                      
+                    $locaties[$districtnummer] = $district;
+                }
+            } else {
+                $locaties[$districtnummer] = $district.' ('.$provincie.')';
+            }
+        }
+        $breadcrumb = self::$breadcrumb;
+        $breadcrumb[] = array('naam' => 'Lijsten overzicht');
+        return compact('login', 'lijsten', 'personeel', 'locaties', 'actief', 'breadcrumb', 'date');
+    }
+
 	public function add() {		
 		$login = Auth::check('member');		
 		if(!$login){
@@ -108,10 +137,8 @@ class lijstenController extends \lithium\action\Controller {
 				$this->request->data['provincie'] = $locatie->provincie;			
 				$lijsten = Lijsten::create($this->request->data);
 				if ($lijsten->save()) {
-					
-				}
-				self::add_permanentie_schema();
-				self::clean_permanentie_schema();
+					self::add_permanentie_schema($lijsten);
+				}				
 			}
 		}
 		$lijsten = Lijsten::create();
@@ -217,11 +244,11 @@ class lijstenController extends \lithium\action\Controller {
 		$type = $this->request->data['type'];
 		$subtype = $this->request->data['subtype'];
 		if (($subtype == "leidinggevenden") || ($subtype == "provinciaal")){
-			$data = Lijsten::Update(array('$addToSet' => array('permanentie.0.week_'.$week[1].'.'.$week[2].'.personeelslid' => array('naam' => $this->request->data['naam'], 'GSM' => $this->request->data['GSM']))), array('_id' => $this->request->id));	
+			$data = Lijsten::Update(array('$addToSet' => array('permanentie.week_'.$week[1].'.'.$week[2].'.personeelslid' => array('naam' => $this->request->data['naam'], 'GSM' => $this->request->data['GSM']))), array('_id' => $this->request->id));	
 		} else if ($type == "calamiteiten" && $subtype == "medewerkers") {
-			$data = Lijsten::Update(array('$addToSet' => array('permanentie.0.week_'.$week[1].'.'.$week[2].'.'.$this->request->data['personeelstype'] => array('naam' => $this->request->data['naam']))), array('_id' => $this->request->id));	
+			$data = Lijsten::Update(array('$addToSet' => array('permanentie.week_'.$week[1].'.'.$week[2].'.'.$this->request->data['personeelstype'] => array('naam' => $this->request->data['naam']))), array('_id' => $this->request->id));	
 		} else if ($type == "winterdienst" && $subtype == "medewerkers") {
-			$data = Lijsten::Update(array('$addToSet' => array('permanentie.0.week_'.$week[1].'.'.$week[2].'.'.$this->request->data['personeelstype'] => array('naam' => $this->request->data['naam']))), array('_id' => $this->request->id));			
+			$data = Lijsten::Update(array('$addToSet' => array('permanentie.week_'.$week[1].'.'.$week[2].'.'.$this->request->data['personeelstype'] => array('naam' => $this->request->data['naam']))), array('_id' => $this->request->id));			
 		}
 		return compact('login', 'data');
 	}
@@ -246,20 +273,20 @@ class lijstenController extends \lithium\action\Controller {
 			}			
 		}
 		$personeelstypes = array('personeelslid', 'arbeider', 'medewerker', 'wegentoezichters-vroeg', 'wegentoezichters-laat', 'arbeiders-vroeg', 'arbeiders-laat');
-		foreach ($lijst['permanentie'][0] as $week => $week_value){
-			foreach ($lijst['permanentie'][0][$week] as $week_key => $week_key_value){
+		foreach ($lijst['permanentie'] as $week => $week_value){
+			foreach ($lijst['permanentie'][$week] as $week_key => $week_key_value){
 				foreach ($personeelstypes as $type){
-					if(array_key_exists($type, $lijst['permanentie'][0][$week][$week_key])){
-						foreach ($lijst['permanentie'][0][$week][$week_key][$type] as $personeel_key => $item){
+					if(array_key_exists($type, $lijst['permanentie'][$week][$week_key])){
+						foreach ($lijst['permanentie'][$week][$week_key][$type] as $personeel_key => $item){
 							if (array_key_exists('gsmnummer', $this->request->data)){
-								if(array_key_exists('GSM', $lijst['permanentie'][0][$week][$week_key][$type][$personeel_key])){
-									if($lijst['permanentie'][0][$week][$week_key][$type][$personeel_key]['GSM'] == $this->request->data['old_gsmnummer'] && $lijst['permanentie'][0][$week][$week_key][$type][$personeel_key]['naam'] == $this->request->data['old_naam']){
-										$lijst['permanentie'][0][$week][$week_key][$type][$personeel_key]['GSM'] = $this->request->data['gsmnummer'];
+								if(array_key_exists('GSM', $lijst['permanentie'][$week][$week_key][$type][$personeel_key])){
+									if($lijst['permanentie'][$week][$week_key][$type][$personeel_key]['GSM'] == $this->request->data['old_gsmnummer'] && $lijst['permanentie'][$week][$week_key][$type][$personeel_key]['naam'] == $this->request->data['old_naam']){
+										$lijst['permanentie'][$week][$week_key][$type][$personeel_key]['GSM'] = $this->request->data['gsmnummer'];
 									}
 								}
-							} else if(array_key_exists('naam', $lijst['permanentie'][0][$week][$week_key][$type][$personeel_key])){
-								if($lijst['permanentie'][0][$week][$week_key][$type][$personeel_key]['naam'] == $this->request->data['old_naam']){
-									$lijst['permanentie'][0][$week][$week_key][$type][$personeel_key]['naam'] = $this->request->data['naam'];
+							} else if(array_key_exists('naam', $lijst['permanentie'][$week][$week_key][$type][$personeel_key])){
+								if($lijst['permanentie'][$week][$week_key][$type][$personeel_key]['naam'] == $this->request->data['old_naam']){
+									$lijst['permanentie'][$week][$week_key][$type][$personeel_key]['naam'] = $this->request->data['naam'];
 								}
 							}
 							
@@ -284,11 +311,11 @@ class lijstenController extends \lithium\action\Controller {
 			if (($this->request->data['GSM']=='') || (!$this->request->data['GSM'])){
 				$this->request->data['GSM'] = null;
 			}
-			$data = Lijsten::Update(array('$pull' => array('permanentie.0.week_'.$week[1].'.'.$week[2].'.personeelslid' => array('naam' => $this->request->data['naam'], 'GSM' => $this->request->data['GSM']))), array('_id' => $this->request->id));	
+			$data = Lijsten::Update(array('$pull' => array('permanentie.week_'.$week[1].'.'.$week[2].'.personeelslid' => array('naam' => $this->request->data['naam'], 'GSM' => $this->request->data['GSM']))), array('_id' => $this->request->id));	
 		} else if ($type == "calamiteiten" && $subtype == "medewerkers") {
-			$data = Lijsten::Update(array('$pull' => array('permanentie.0.week_'.$week[1].'.'.$week[2].'.'.$this->request->data['personeelstype'] => array('naam' => $this->request->data['naam']))), array('_id' => $this->request->id));	
+			$data = Lijsten::Update(array('$pull' => array('permanentie.week_'.$week[1].'.'.$week[2].'.'.$this->request->data['personeelstype'] => array('naam' => $this->request->data['naam']))), array('_id' => $this->request->id));	
 		} else if ($type == "winterdienst" && $subtype == "medewerkers") {
-			$data = Lijsten::Update(array('$pull' => array('permanentie.0.week_'.$week[1].'.'.$week[2].'.'.$this->request->data['personeelstype'] => array('naam' => $this->request->data['naam']))), array('_id' => $this->request->id));			
+			$data = Lijsten::Update(array('$pull' => array('permanentie.week_'.$week[1].'.'.$week[2].'.'.$this->request->data['personeelstype'] => array('naam' => $this->request->data['naam']))), array('_id' => $this->request->id));			
 		}
 	}
 
@@ -308,8 +335,8 @@ class lijstenController extends \lithium\action\Controller {
 		$tussendatum = $tussendatum_arr[2].'-'.$tussendatum_arr[1].'-'.$tussendatum_arr[0];
 		$einddatum_arr = explode('/', $data['einddatum']);
 		$einddatum = $einddatum_arr[2].'-'.$einddatum_arr[1].'-'.$einddatum_arr[0];
-		$lijst['permanentie'][0][$week_arr[0].'_'.$week_arr[1]][$week_arr[2]]['einddatum'] =  new \MongoDate(strtotime($tussendatum));
-		$lijst['permanentie'][0][$week_arr[0].'_'.$week_arr[1]][] =  array('startdatum' => new \MongoDate(strtotime($tussendatum)), 'einddatum' => new \MongoDate(strtotime($einddatum)));
+		$lijst['permanentie'][$week_arr[0].'_'.$week_arr[1]][$week_arr[2]]['einddatum'] =  new \MongoDate(strtotime($tussendatum));
+		$lijst['permanentie'][$week_arr[0].'_'.$week_arr[1]][] =  array('startdatum' => new \MongoDate(strtotime($tussendatum)), 'einddatum' => new \MongoDate(strtotime($einddatum)));
 		$lijsten->save($lijst);
 		$row = '<tr id="week_'.$week_arr[1].'_'.$week.'" class="highlight"><td class="week"></td><td class="van">'.$data['tussendatum'].'</td><td class="tot">'.$data['einddatum'].'</td>';
 		$datum = $data['tussendatum'];
@@ -348,47 +375,50 @@ class lijstenController extends \lithium\action\Controller {
 		$week_arr = explode('_', $data['week']);		
 		$lijsten = Lijsten::find('first', array('conditions' => array('_id' => $this->request->id)));
 		$lijst = $lijsten->data();
-		$einddatum = $lijst['permanentie'][0][$week_arr[0].'_'.$week_arr[1]][$week_arr[2]]['einddatum'];
-		unset($lijst['permanentie'][0][$week_arr[0].'_'.$week_arr[1]][$week_arr[2]]);
-		$lijst['permanentie'][0][$week_arr[0].'_'.$week_arr[1]][($week_arr[2]-1)]['einddatum'] =  $einddatum;
+		$einddatum = $lijst['permanentie'][$week_arr[0].'_'.$week_arr[1]][$week_arr[2]]['einddatum'];
+		unset($lijst['permanentie'][$week_arr[0].'_'.$week_arr[1]][$week_arr[2]]);
+		$lijst['permanentie'][$week_arr[0].'_'.$week_arr[1]][($week_arr[2]-1)]['einddatum'] =  $einddatum;
 		$einddatum = date('d/m/Y', $einddatum);
 		$row_einddatum = 'week_'.$week_arr[1].'_'.($week_arr[2]-1);
 		$lijsten->save($lijst);
 		return compact('login', 'einddatum', 'pulled', 'row_einddatum');
 	}
 
-	public function add_permanentie_schema(){
+	public function add_permanentie_schema($lijsten = array()){
 		$login = Auth::check('member');
 		if(!$login){
 			return $this->redirect('/login');
 		}	
-		$lijsten = Lijsten::find('all');
+		$lijsten = Lijsten::find('all', array('conditions' => array('_id' => $lijsten->_id)));
 		$data = array();
 		foreach ($lijsten as $lijst)
 		{
 			$year = date('Y',$lijst->Startdatum->sec);
 			$i = date('W', $lijst->Startdatum->sec);
 			$eind_week = date('W', $lijst->Einddatum->sec);
-			if ($i == $eind_week){
-				$eind_week--;
-			}
+            $huidige_week = $lijst->Startdatum->sec;
 			$weken = array();    		
-			while ($i != $eind_week){
+			while ($huidige_week < $lijst->Einddatum->sec){
 				if ($i <=9) {
 			    	$digit = '0';
 			    } else {
 			    	$digit = '';
 			    }
+                $huidige_week = strtotime($year."W".$digit.$i);
 				$y = $i;
-				$y++;
-				$weken['week_'.$i][0] = array('startdatum' => new \MongoDate(strtotime($year."W".$digit.$i)), 'einddatum' => new \MongoDate(strtotime($year."W".$digit.$y)));				
-				if ($i == 52){
-					$i = 0;
+				$y++;								
+				if ($i == date('W', mktime(0,0,0,12,28,$year))){
+				    $previous_i = $i;
+                    $previous_year = $year;
+					$i = 0;                   
 					$year++;
+                    $weken['week_'.$previous_i][$previous_i] = array('startdatum' => new \MongoDate(strtotime($previous_year."W".$digit.$previous_i)), 'einddatum' => new \MongoDate(strtotime($year."W01")));
+				} else {
+				    $weken['week_'.$i][0] = array('startdatum' => new \MongoDate(strtotime($year."W".$digit.$i)), 'einddatum' => new \MongoDate(strtotime($year."W".$digit.$y)));
 				}
 				$i++;	
 			}	
-			$data[] = Lijsten::Update(array('$push' => array('permanentie' => $weken)), array('_id' => $lijst->_id));	
+			$data[] = Lijsten::Update(array('$set' => array('permanentie' => $weken)), array('_id' => $lijst->_id));	
 		}		
 		return compact('login', 'data');	
 	}
@@ -398,9 +428,14 @@ class lijstenController extends \lithium\action\Controller {
 		if(!$login){
 			return $this->redirect('/login');
 		}
-		$data = Lijsten::Update(array('$unset' => array('permanentie.1' => 1, 'permanentie.2' => 1,'permanentie.3' => 1,'permanentie.4' => 1,'permanentie.5' => 1,'permanentie.6' => 1,'permanentie.7' => 1,'permanentie.8' => 1,'permanentie.9' => 1,'permanentie.10' => 1,'permanentie.11' => 1, 'permanentie.12' => 1, 'permanentie.13' => 1)));
-		
-		return compact('login', 'data');
+        $lijsten = Lijsten::find('all');
+        $lijsten_arr = $lijsten->data();
+        $data = '';
+        foreach($lijsten_arr as $lijst){
+		    Lijsten::Update(array('$set' => array('permanentie' => $lijst['permanentie'][0][0])), array('_id' => $lijst['_id']));
+            $data .= 'District: '.$lijst['district'].', type: '.$lijst['type'].',  subtype: '.$lijst['subtype']. ': OK<br />';           
+        }
+		return compact('login', 'data', $permanentie);
 	}
 	
 	public function add_weken(){
@@ -448,7 +483,7 @@ class lijstenController extends \lithium\action\Controller {
 			{
 				$eind_week--;
 			}				    		
-			foreach ($lijsten_arr['permanentie'][0] as $test){
+			foreach ($lijsten_arr['permanentie'] as $test){
 				if ($i <=9) {
 					$digit = '0';
 				} else {
@@ -456,18 +491,18 @@ class lijstenController extends \lithium\action\Controller {
 				}
 				$y = $i;
 				$y++;
-				foreach ($lijsten_arr['permanentie'][0]['week_'.$i] as $key => $value){					
+				foreach ($lijsten_arr['permanentie']['week_'.$i] as $key => $value){					
 					if($key==0){
 						$week = $i;
 					} else {
 						$week = '';
 					}									
-					$van = date('d/m/Y', $lijsten_arr['permanentie'][0]['week_'.$i][$key]['startdatum']);
-					$tot = date('d/m/Y',$lijsten_arr['permanentie'][0]['week_'.$i][$key]['einddatum']);
+					$van = date('d/m/Y', $lijsten_arr['permanentie']['week_'.$i][$key]['startdatum']);
+					$tot = date('d/m/Y',$lijsten_arr['permanentie']['week_'.$i][$key]['einddatum']);
 					if ($lijsten->subtype == "leidinggevenden" || ($lijsten->subtype == "provinciaal")){									
-						if (array_key_exists('personeelslid', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
+						if (array_key_exists('personeelslid', $lijsten_arr['permanentie']['week_'.$i][$key])){
 							$list_data = array('naam' => '', 'GSM' => '');
-							foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['personeelslid'] as $number){			
+							foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['personeelslid'] as $number){			
 								if(isset($number['naam'])){
 									$list_data['naam'] .=  $number['naam'].' ';
 									$list_data['GSM'] .= $number['GSM'].' ';
@@ -477,8 +512,8 @@ class lijstenController extends \lithium\action\Controller {
 						} 																
 					} else if ($lijsten->type == "calamiteiten") {
 						$list_data = array('medewerker' => '', 'arbeider' => '');
-						if (array_key_exists('arbeider', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-							foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['arbeider'] as $number){			
+						if (array_key_exists('arbeider', $lijsten_arr['permanentie']['week_'.$i][$key])){
+							foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['arbeider'] as $number){			
 								if(isset($number['naam'])){
 									if($list_data['arbeider']!=''){
 										$list_data['arbeider'] .= "\r\n";
@@ -487,8 +522,8 @@ class lijstenController extends \lithium\action\Controller {
 								} 
 							}
 						}
-						if (array_key_exists('medewerker', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-							foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['medewerker'] as $number){
+						if (array_key_exists('medewerker', $lijsten_arr['permanentie']['week_'.$i][$key])){
+							foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['medewerker'] as $number){
 								if(isset($number['naam'])){
 									if($list_data['medewerker']!=''){
 										$list_data['medewerker'] .= "\r\n";
@@ -500,8 +535,8 @@ class lijstenController extends \lithium\action\Controller {
 						fputcsv($fp, array($week, $van, $tot, $list_data['medewerker'], $list_data['arbeider']), ';', '"'); 																			
 					} else {									 
 						$list_data = array('wegentoezichters-vroeg' => '', 'wegentoezichters-laat' => '', 'arbeiders-vroeg' => '', 'arbeiders-laat' => '');
-						if (array_key_exists('arbeiders-vroeg', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-							foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['arbeiders-vroeg'] as $number){			
+						if (array_key_exists('arbeiders-vroeg', $lijsten_arr['permanentie']['week_'.$i][$key])){
+							foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['arbeiders-vroeg'] as $number){			
 								if(isset($number['naam'])){
 									if($list_data['arbeiders-vroeg']!=''){
 										$list_data['arbeiders-vroeg'] .= "\r\n";
@@ -510,8 +545,8 @@ class lijstenController extends \lithium\action\Controller {
 								} 
 							}
 						}
-						if(array_key_exists('arbeiders-laat', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-							foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['arbeiders-laat'] as $number){			
+						if(array_key_exists('arbeiders-laat', $lijsten_arr['permanentie']['week_'.$i][$key])){
+							foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['arbeiders-laat'] as $number){			
 								if(isset($number['naam'])){
 									if($list_data['arbeiders-laat']!=''){
 										$list_data['arbeiders-laat'] .= "\r\n";
@@ -520,8 +555,8 @@ class lijstenController extends \lithium\action\Controller {
 								} 
 							}
 						}
-						if (array_key_exists('wegentoezichters-vroeg', $lijsten_arr['permanentie'][0]['week_'.$i][$key])) {
-							foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['wegentoezichters-vroeg'] as $number){
+						if (array_key_exists('wegentoezichters-vroeg', $lijsten_arr['permanentie']['week_'.$i][$key])) {
+							foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['wegentoezichters-vroeg'] as $number){
 								if(isset($number['naam'])){
 									if($list_data['wegentoezichters-vroeg']!=''){
 										$list_data['wegentoezichters-vroeg'] .= "\r\n";
@@ -530,8 +565,8 @@ class lijstenController extends \lithium\action\Controller {
 								} 												
 							}
 						}
-						if (array_key_exists('wegentoezichters-laat', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-							foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['wegentoezichters-laat'] as $number){
+						if (array_key_exists('wegentoezichters-laat', $lijsten_arr['permanentie']['week_'.$i][$key])){
+							foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['wegentoezichters-laat'] as $number){
 								if(isset($number['naam'])){
 									if($list_data['wegentoezichters-laat']!=''){
 										$list_data['wegentoezichters-laat'] .= "\r\n";
@@ -567,7 +602,7 @@ class lijstenController extends \lithium\action\Controller {
 			$year = date('Y',$lijsten->Startdatum->sec);
 			$i = date('W', $lijsten->Startdatum->sec);
 			$eind_week = date('W', $lijsten->Einddatum->sec);		   		
-			foreach ($lijsten_arr['permanentie'][0] as $test){
+			foreach ($lijsten_arr['permanentie'] as $test){
 				if ($i <=9) {
 					$digit = '0';
 				} else {
@@ -575,19 +610,19 @@ class lijstenController extends \lithium\action\Controller {
 				}
 				$y = $i;
 				$y++;
-				foreach ($lijsten_arr['permanentie'][0]['week_'.$i] as $key => $value){
+				foreach ($lijsten_arr['permanentie']['week_'.$i] as $key => $value){
 					$table .= '<tr id="week_'.$i.'_0">';
 					if($key==0){
 						$table .=  '<td class="week">'.$i.'</td>';
 					} else {
 						$table .=  '<td class="week"></td>';
 					}									
-					$table .=  '<td class="van">'.date('d/m/Y',$lijsten_arr['permanentie'][0]['week_'.$i][$key]['startdatum']).'</td>';
-					$table .=  '<td class="tot">'.date('d/m/Y',$lijsten_arr['permanentie'][0]['week_'.$i][$key]['einddatum']).'</td>';
+					$table .=  '<td class="van">'.date('d/m/Y',$lijsten_arr['permanentie']['week_'.$i][$key]['startdatum']).'</td>';
+					$table .=  '<td class="tot">'.date('d/m/Y',$lijsten_arr['permanentie']['week_'.$i][$key]['einddatum']).'</td>';
 						if ($lijsten->subtype == "leidinggevenden" || ($lijsten->subtype == "provinciaal")){									
-							if (array_key_exists('personeelslid', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
+							if (array_key_exists('personeelslid', $lijsten_arr['permanentie']['week_'.$i][$key])){
 								$list_data = array('naam' => '', 'GSM' => '');
-								foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['personeelslid'] as $number){			
+								foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['personeelslid'] as $number){			
 									if(isset($number['naam'])){
 										$list_data['naam'] .=  $number['naam'];
 										$list_data['GSM'] .= $number['GSM'];
@@ -599,8 +634,8 @@ class lijstenController extends \lithium\action\Controller {
 							}																	
 						} else if ($lijsten->type == "calamiteiten") {
 						$list_data = array('medewerker' => '', 'arbeider' => '');
-						if (array_key_exists('arbeider', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-							foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['arbeider'] as $number){			
+						if (array_key_exists('arbeider', $lijsten_arr['permanentie']['week_'.$i][$key])){
+							foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['arbeider'] as $number){			
 								if(isset($number['naam'])){
 									if($list_data['arbeider']!=''){
 										$list_data['arbeider'] .=  "<br />";
@@ -609,8 +644,8 @@ class lijstenController extends \lithium\action\Controller {
 								} 
 							}
 						}
-						if (array_key_exists('medewerker', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-							foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['medewerker'] as $number){
+						if (array_key_exists('medewerker', $lijsten_arr['permanentie']['week_'.$i][$key])){
+							foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['medewerker'] as $number){
 								if(isset($number['naam'])){
 									if($list_data['medewerker']!=''){
 										$list_data['medewerker'] .=  "<br />";
@@ -622,8 +657,8 @@ class lijstenController extends \lithium\action\Controller {
 						fputcsv($fp, array($week, $van, $tot, $list_data['medewerker'], $list_data['arbeider']), ';', '"'); 																			
 					} else {									 
 						$list_data = array('wegentoezichters-vroeg' => '', 'wegentoezichters-laat' => '', 'arbeiders-vroeg' => '', 'arbeiders-laat' => '');
-						if (array_key_exists('arbeiders-vroeg', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-							foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['arbeiders-vroeg'] as $number){			
+						if (array_key_exists('arbeiders-vroeg', $lijsten_arr['permanentie']['week_'.$i][$key])){
+							foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['arbeiders-vroeg'] as $number){			
 								if(isset($number['naam'])){
 									if($list_data['arbeiders-vroeg']!=''){
 										$list_data['arbeiders-vroeg'] .= "<br />";
@@ -632,8 +667,8 @@ class lijstenController extends \lithium\action\Controller {
 								} 
 							}
 						}
-						if(array_key_exists('arbeiders-laat', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-							foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['arbeiders-laat'] as $number){			
+						if(array_key_exists('arbeiders-laat', $lijsten_arr['permanentie']['week_'.$i][$key])){
+							foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['arbeiders-laat'] as $number){			
 								if(isset($number['naam'])){
 									if($list_data['arbeiders-laat']!=''){
 										$list_data['arbeiders-laat'] .=  "<br />";
@@ -642,8 +677,8 @@ class lijstenController extends \lithium\action\Controller {
 								} 
 							}
 						}
-						if (array_key_exists('wegentoezichters-vroeg', $lijsten_arr['permanentie'][0]['week_'.$i][$key])) {
-							foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['wegentoezichters-vroeg'] as $number){
+						if (array_key_exists('wegentoezichters-vroeg', $lijsten_arr['permanentie']['week_'.$i][$key])) {
+							foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['wegentoezichters-vroeg'] as $number){
 								if(isset($number['naam'])){
 									if($list_data['wegentoezichters-vroeg']!=''){
 										$list_data['wegentoezichters-vroeg'] .=  "<br />";
@@ -652,8 +687,8 @@ class lijstenController extends \lithium\action\Controller {
 								} 												
 							}
 						}
-						if (array_key_exists('wegentoezichters-laat', $lijsten_arr['permanentie'][0]['week_'.$i][$key])){
-							foreach ($lijsten_arr['permanentie'][0]['week_'.$i][$key]['wegentoezichters-laat'] as $number){
+						if (array_key_exists('wegentoezichters-laat', $lijsten_arr['permanentie']['week_'.$i][$key])){
+							foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['wegentoezichters-laat'] as $number){
 								if(isset($number['naam'])){
 									if($list_data['wegentoezichters-laat']!=''){
 										$list_data['wegentoezichters-laat'] .=  "<br />";

@@ -795,3 +795,26 @@ td div.element
 	-khtml-user-select: none;
 	-webkit-user-select: none;
 }
+ul#calamiteiten-lijst li {
+  list-style:none;
+  padding: 0 0;
+} 
+
+.lists ul {
+  background: #f5f5f5;
+  margin-left: 0px;
+  padding: 12px 10px 8px 15px;
+  border-radius: 10px;
+}
+
+.lists ul li {
+  font-size: small;
+  list-style: none;
+  
+}
+.lists ul li a {
+}
+
+.lists ul li a:hover{
+  text-decoration: none;
+}

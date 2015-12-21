@@ -11,13 +11,11 @@
 <head>
 	<?php echo $this->html->charset();?>
 	<title>Permanentie > <?php echo $this->title(); ?></title>
-	<?php echo $this->html->style(array('debug', 'lithium', 'bootstrap', '/js/jquery-ui/css/eggplant/jquery-ui-1.10.1.custom.css')); ?>
+	<?php echo $this->html->style(array('debug', 'lithium', 'bootstrap', '/js/jquery-ui-n/jquery-ui.min.css', '/js/jquery-ui-n/jquery-ui.theme.min.css', '/js/jquery-ui-n/jquery-ui.structure.min.css')); ?>
 	<?php echo $this->scripts(); ?>
 	<?php echo $this->html->script('jquery-ui/js/jquery-1.9.1.js')?>
-	<?php echo $this->html->script('jquery-ui/js/jquery-ui-1.10.1.custom.js')?>
-	<?php echo $this->html->script('modernizr.js')?>
+	<?php echo $this->html->script('jquery-ui-n/jquery-ui.min.js')?>
 	<?php echo $this->html->script('jquery.tinyscrollbar.min.js')?>
-	<?php echo $this->html->script('jquery-ui/jquery.ui.datepicker-nl.js')?>
 	<?php echo $this->html->script('default.js')?>
 	<?php echo $this->html->script('lijsten.js')?>
 	
@@ -30,7 +28,7 @@
 		<div class="navbar-inner">
 			<a class="brand" href="#">Permanentie</a>		
 			<ul class="nav navbar-nav">
-
+                <li class="<?php echo $actief['overzicht']?>"><?=$this->html->link('Overzicht', 'lijsten/overzicht')?></li>
 				<li class="<?php echo $actief['lijsten']?>"><?=$this->html->link('Lijsten', 'lijsten')?></li>
 				<?php if ($login['rol'] == 'administrator') {?>
 				<li class="<?php echo $actief['beheren']?> dropdown">

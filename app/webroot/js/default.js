@@ -1,7 +1,4 @@
 $(document).ready(function(){		
-	if (!Modernizr.inputtypes['date']) {
-		$('.datepicker').datepicker({ dateFormat: 'dd-mm-yy', firstDay: 1  });
-	}
 	$('#gebruiker_toevoegen').on('click', function(event){
 		var url = $(this).parents('form').attr('action');
 		var form_data = $(this).parents('form').serialize();
@@ -35,7 +32,7 @@ $(document).ready(function(){
 					$('#UsersUserOk').val('1');
 					$('UsernameOkText').hide();
 				}
-			}, 'json')
+			}, 'json');
 		}		
 	});
 	
