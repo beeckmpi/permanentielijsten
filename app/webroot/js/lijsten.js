@@ -37,12 +37,13 @@ $(function() {
 					data.subtype = $('#permanentie_tabel').data('subtype');
 					data.naam = $(this).children('.element:last').children('.naam').text();
 					data.week = $(this).parents('tr').attr('id');
-					if(data.type == "calamiteiten" && data.subtype == "medewerkers"){
-						if ($(this).hasClass('medewerker')){
-							data.personeelstype = 'medewerker';
-						} else {
-							data.personeelstype = 'arbeider';
-						}
+					if(data.subtype == "leidinggevenden" || data.subtype == "provinciaal"){					
+						data.GSM = $(this).children('.element:last').children('.GSM').html();
+					} else if(data.type == "calamiteiten" && data.subtype == "medewerkers"){
+					  if ($(this).hasClass('medewerker')){
+              data.personeelstype = 'medewerker';
+            }
+						data.GSM = $(this).children('.element:last').children('.GSM').html();
 					} else if(data.type == "winterdienst" && data.subtype == "medewerkers"){	
 						if ($(this).hasClass('wegentoezichters-vroeg')){
 							data.personeelstype = 'wegentoezichters-vroeg';
@@ -53,19 +54,16 @@ $(function() {
 						} else if ($(this).hasClass('arbeiders-laat')){
 							data.personeelstype = 'arbeiders-laat';
 						}
-					} else if(data.subtype == "leidinggevenden" || data.subtype == "provinciaal"){         
-            data.GSM = $(this).children('.element:last').children('.GSM').html();
-            if($(this).children('.element:last').children('.GSM').html() != undefined){
-              $(this).next('td').append('<div class="element GSM_element">'+$(this).children('.element:last').children('.GSM').html()+'</div>');
-            }
-          } 				
+					}				
 					$.post(href, data, function(json){
 						if (json.login == false){
 							alert('U bent niet meer ingelogd op de site. Gelieve u op opnieuw aan te melden. Anders zullen de wijzigingen niet meer worden opgeslagen.');
 							window.location.href="login";
 						}
 					}, 'json');
-					
+					if($(this).children('.element:last').children('.GSM').html() != undefined){
+						$(this).next('td').append('<div class="element GSM_element">'+$(this).children('.element:last').children('.GSM').html()+'</div>');
+					}
 					$('.drag').attr('draggable', true);		
 					$('.element .icon-pencil').remove();	 
 					$('.element .icon-info-sign').remove();	
@@ -88,8 +86,7 @@ $(function() {
 		editPersoneel();
 	});	
 	$('.save_modal').click(function(e){
-		var id = $(this).parents('.modal').attr('id');
-		$('#'+id+' .modal-body form').trigger('submit');
+		$(this).parents('.modal-footer').siblings('.modal-body').children('form').trigger('submit');
 	});	
 	$(document).on('click', 'li .icon-pencil', function(e){
 		var naam = $(this).siblings('.naam').text();
@@ -114,19 +111,13 @@ $(function() {
 		$('#eind_datum_max').text(eind_datum_max);
 		$('#begin_datum').val(begin_datum_min);
 		$('#eind_datum').val(eind_datum_max);
+		$('#tussendatum').val(begin_datum_min);
 		$('#week_add_form').children('#week').val(id);
 		begin_datum_array[0] = parseInt(begin_datum_array[0])+1;
 		eind_datum_array[0] = parseInt(eind_datum_array[0])-1;
-		var minDate = new Date(parseInt(begin_datum_array[2])+'-'+parseInt(begin_datum_array[1])+'-'+parseInt(begin_datum_array[0])+'T01:00:00.000Z');		
-		var maxDate = new Date(parseInt(eind_datum_array[2])+'-'+parseInt(eind_datum_array[1])+'-'+parseInt(eind_datum_array[0])+'T01:00:00.000Z');
-		$('#tussendatum').datepicker({ 
-		  dateFormat: 'dd/mm/yy', 
-		  firstDay: 1, 
-		  constrainInput: true, 
-		  minDate: minDate, 
-		  maxDate: maxDate,
-		  inline:true
-		});
+		if (!Modernizr.inputtypes['date']) {
+			$('#tussendatum').datepicker({ dateFormat: 'dd/mm/yy', firstDay: 1, constrainInput: true, minDate: (new Date(begin_datum_array[2]+','+begin_datum_array[1]+','+begin_datum_array[0])), maxDate: new Date(eind_datum_array[2]+','+eind_datum_array[1]+','+eind_datum_array[0]) });
+		}
 		$('#myModal_add_row').modal('show');
 	});
 	$(document).on('click', 'li .icon-remove-sign', function(e){
@@ -186,7 +177,7 @@ $(function() {
 					$(this).remove();
 				});
 			}
-		});
+		})
 		$(this).parent().fadeOut('slow', function(){			
 			$(this).remove();		
 		});		
@@ -235,26 +226,21 @@ $(function() {
 		});
 	});
 	$(document).on('submit', '#week_add_form', function(event){
-	  if($(this).children('#tussendatum').val() !== ''){
-  		event.preventDefault();
-  		var url = window.location.href;
-  		var url_arr = url.split('/lijsten/');
-  		var hrefl = url_arr[0]+'/lijsten/'+$(this).attr('action');
-  		var data = new Object;
-  		data.begindatum = $(this).children('#begin_datum').val();
-  		data.einddatum = $(this).children('#eind_datum').val();
-  		data.tussendatum = $(this).children('#tussendatum').val();
-  		data.week = $(this).children('#week').val();
-  		$.post(hrefl, data, function(json){
-  			$('#'+data.week).after(json.row);
-  			$('#'+data.week).children('.tot').text(json.datum);
-  			$('#myModal_add_row').modal('hide');
-  			window.setTimeout(removehighlite, 4000);
-  		}, 'json');
-  	} else {  	  
-  	  alert('U moet een datum invullen, dit kan u doen door in het vak "tussendatum" te klikken en een datum te kiezen.');
-  	  event.preventDefault();
-  	}
+		event.preventDefault();
+		var url = window.location.href;
+		var url_arr = url.split('/lijsten/');
+		var hrefl = url_arr[0]+'/lijsten/'+$(this).attr('action');
+		var data = new Object;
+		data.begindatum = $(this).children('#begin_datum').val();
+		data.einddatum = $(this).children('#eind_datum').val();
+		data.tussendatum = $(this).children('#tussendatum').val();
+		data.week = $(this).children('#week').val();
+		$.post(hrefl, data, function(json){
+			$('#'+data.week).after(json.row);
+			$('#'+data.week).children('.tot').text(json.datum);
+			$('#myModal_add_row').modal('hide');
+			window.setTimeout(removehighlite, 4000);
+		}, 'json');
 	});
 	$(document).on('click', 'a.remove_row', function(event){
 		event.preventDefault();
@@ -268,76 +254,63 @@ $(function() {
 		}, 'json');
 	});
 	$(document).on('ready', function(event){
-	  changeView();
+		changeFilter();
 	});
-	$(document).on('change', 'select[name="type"], select[name="provincie"], select[name="District"]', function(event){		
-		changeView();
+	
+	$(document).on('change', 'select[name="type"], select[name="provincie"], select[name="District"]', function(event){
+		changeFilter();
 	});
-	function changeView(){
-	  var url = window.location.href;
-    var url_arr = url.split('/lijsten');
-    var hrefl = url_arr[0]+'/lijsten/';
-	  var jaar = $('select[name="type"] option:selected').val();
-    var provincie = $('select[name="provincie"] option:selected').val();
-    var district = $('select[name="District"] option:selected').val();
-    $.getJSON(hrefl+'/index/'+jaar+'/'+provincie+'/'+district, function(json){
-      $('#calamiteiten-provinciaal-coordinator-lijst, #calamiteiten-districtmedewerkers-lijst').html('');
-      if (json.calamiteiten){
-        $.each(json.calamiteiten, function(index){
-          var startdatum = toDateYear(json.calamiteiten[index].Startdatum);
-          var einddatum = toDateYear(json.calamiteiten[index].Einddatum);   
-          if(json.calamiteiten[index].subtype == 'medewerkers') {
-            var subtype = 'districtsmedewerkers';
-          } else {
-            var subtype = json.calamiteiten[index].subtype;
-          }
-          if( json.calamiteiten[index].districtscode == 'AD_ANT' || (json.calamiteiten[index].district.indexOf('Alle districten') !== -1)){ 
-            if (json.calamiteiten[index].subtype == 'leidinggevenden'){ 
-              var link_leidinggevenden = '<a href="'+hrefl+'view/calamiteiten/'+json.calamiteiten[index].subtype+'/'+json.calamiteiten[index].districtscode+'/'+startdatum+'">Beurtrol Provinciaal Coördinator Permanentie '+json.calamiteiten[index].district.replace('Alle districten ', '')+' ('+startdatum+'-'+einddatum+')</a>';
-            } else if (json.calamiteiten[index].subtype == 'EM'){
-              var link = '<a href="'+hrefl+'view/calamiteiten/'+json.calamiteiten[index].subtype+'/'+json.calamiteiten[index].districtscode+'/'+startdatum+'">Beurtrol Permanentie Sectie EM ('+json.calamiteiten[index].provincie+') ('+startdatum+'-'+einddatum+')</a>';
-            }
-          } else {  
-            var link_medewerkers = '<a href="'+hrefl+'view/calamiteiten/'+json.calamiteiten[index].subtype+'/'+json.calamiteiten[index].districtscode+'/'+startdatum+'">Beurtrol '+subtype+' '+json.calamiteiten[index].districtscode+' '+json.calamiteiten[index].district+' ('+startdatum+'-'+einddatum+')</a>';
-          }
-          if (link_leidinggevenden){
-            $('#calamiteiten-provinciaal-coordinator-lijst').append('<li>'+link_leidinggevenden+'</li>');
-          }
-          if (link_medewerkers) {
-            $('#calamiteiten-districtmedewerkers-lijst').append('<li>'+link_medewerkers+'</li>');
-          }
-        });
-      }
-      $('#winterdienst-districtmedewerkers-lijst, #winterdienst-leidinggevenden-lijst, #winterdienst-provinciaal-coordinator-lijst').html('');
-      if (json.winterdienst){
-        $.each(json.winterdienst, function(index){
-          var startdatum = toDateYear(json.winterdienst[index].Startdatum);
-          var einddatum = toDateYear(json.winterdienst[index].Einddatum);
-          if(json.winterdienst[index].subtype == 'medewerkers') {
-            var subtype = 'districtsmedewerkers';
-          } else {
-            var subtype = json.winterdienst[index].subtype;
-          }
-          if( json.winterdienst[index].subtype == 'provinciaal' || json.winterdienst[index].district == 'Alle districten'){
-            var link_provinciaal = '<a href="'+hrefl+'view/winterdienst/'+json.winterdienst[index].subtype+'/'+json.winterdienst[index].districtscode+'/'+startdatum+'">Beurtrol Provinciaal Coördinator '+json.winterdienst[index].district.replace('Alle districten ', '')+' ('+startdatum+'-'+einddatum+')</a>';  
-          } else if( json.winterdienst[index].subtype == 'leidinggevenden'){
-            var link_leidinggevenden = '<a href="'+hrefl+'view/winterdienst/'+json.winterdienst[index].subtype+'/'+json.winterdienst[index].districtscode+'/'+startdatum+'">Beurtrol '+subtype+' '+json.winterdienst[index].districtscode+' '+json.winterdienst[index].district+' ('+startdatum+'-'+einddatum+')</a>';            
-          } else {
-            var link_medewerkers = '<a href="'+hrefl+'view/winterdienst/'+json.winterdienst[index].subtype+'/'+json.winterdienst[index].districtscode+'/'+startdatum+'">Beurtrol '+subtype+' '+json.winterdienst[index].districtscode+' '+json.winterdienst[index].district+' ('+startdatum+'-'+einddatum+')</a>';
-          }        
-          if (link_provinciaal) {
-            $('#winterdienst-provinciaal-coordinator-lijst').append('<li>'+link_provinciaal+'</li>');
-          }
-          if (link_leidinggevenden) {
-            $('#winterdienst-leidinggevenden-lijst').append('<li>'+link_leidinggevenden+'</li>');
-          }
-          if (link_medewerkers) {
-            $('#winterdienst-districtmedewerkers-lijst').append('<li>'+link_medewerkers+'</li>');
-          }
-          
-        });
-      }
-    });
+	
+	function changeFilter(){
+		var url = window.location.href;
+		var url_arr = url.split('/lijsten');
+		var hrefl = url_arr[0]+'/lijsten/';
+		var jaar = $('select[name="type"] option:selected').val();
+		var provincie = $('select[name="provincie"] option:selected').val();
+		var district = $('select[name="District"] option:selected').val();
+		$.getJSON(hrefl+'/index/'+jaar+'/'+provincie+'/'+district, function(json){
+			$('#calamiteiten-lijst').html('');
+			if (json.calamiteiten){
+				$.each(json.calamiteiten, function(index){
+					var startdatum = toDateYear(json.calamiteiten[index].Startdatum);
+					var einddatum = toDateYear(json.calamiteiten[index].Einddatum);		
+					if(json.calamiteiten[index].subtype == 'medewerkers') {
+						var subtype = 'districtsmedewerkers';
+					} else {
+						var subtype = json.calamiteiten[index].subtype;
+					}
+					if( json.calamiteiten[index].districtscode == 'AD_ANT' || (json.calamiteiten[index].district.indexOf('Alle districten') !== -1)){	
+						if (json.calamiteiten[index].subtype == 'leidinggevenden'){	
+							var link = '<a href="'+hrefl+'view/calamiteiten/'+json.calamiteiten[index].subtype+'/'+json.calamiteiten[index].districtscode+'/'+startdatum+'">Beurtrol leidinggevenden calamiteiten wachtdienst ('+json.calamiteiten[index].provincie+') ('+startdatum+'-'+einddatum+')</a>';
+						} else if (json.calamiteiten[index].subtype == 'EM'){
+							var link = '<a href="'+hrefl+'view/calamiteiten/'+json.calamiteiten[index].subtype+'/'+json.calamiteiten[index].districtscode+'/'+startdatum+'">Beurtrol Permanentie Sectie EM ('+json.calamiteiten[index].provincie+') ('+startdatum+'-'+einddatum+')</a>';
+						}
+					} else {	
+						var link = '<a href="'+hrefl+'view/calamiteiten/'+json.calamiteiten[index].subtype+'/'+json.calamiteiten[index].districtscode+'/'+startdatum+'">Beurtrol '+subtype+' '+json.calamiteiten[index].districtscode+' '+json.calamiteiten[index].district+' ('+startdatum+'-'+einddatum+')</a>';
+					}
+					$('#calamiteiten-lijst').append('<li>'+link+'</li>');
+				});
+			}
+			$('#winterdienst-lijst').html('');
+			if (json.winterdienst){
+				$.each(json.winterdienst, function(index){
+					var startdatum = toDateYear(json.winterdienst[index].Startdatum);
+					var einddatum = toDateYear(json.winterdienst[index].Einddatum);
+					if(json.winterdienst[index].subtype == 'medewerkers') {
+						var subtype = 'districtsmedewerkers';
+					} else {
+						var subtype = json.winterdienst[index].subtype;
+					}
+					if( json.winterdienst[index].subtype == 'provinciaal' || json.winterdienst[index].district == 'Alle districten'){
+						var link = '<a href="'+hrefl+'view/winterdienst/'+json.winterdienst[index].subtype+'/'+json.winterdienst[index].districtscode+'/'+startdatum+'">Beurtrol Provinciaal Coördinator ('+json.winterdienst[index].provincie+') ('+startdatum+'-'+einddatum+')</a>';	
+					} else {
+						var link = '<a href="'+hrefl+'view/winterdienst/'+json.winterdienst[index].subtype+'/'+json.winterdienst[index].districtscode+'/'+startdatum+'">Beurtrol '+subtype+' '+json.winterdienst[index].districtscode+' '+json.winterdienst[index].district+' ('+startdatum+'-'+einddatum+')</a>';
+						
+					}					
+					$('#winterdienst-lijst').append('<li>'+link+'</li>');
+				});
+			}
+		});
 	}
 	$('ul#werknemers li').hover(function(e){	
 		var naam = $(this).children('span.naam').text();

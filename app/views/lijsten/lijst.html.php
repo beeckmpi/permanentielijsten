@@ -144,7 +144,7 @@
 												} 												
 											}
 										}
-										echo '<td class="medewerker dropable">'.$list_data['naam'].'</td><td class="leidingevende GSM">'.$list_data['GSM'].'</td><td>'.$button.'</td></tr>';																		
+										echo '<td class="medewerker dropable">'.$list_data['naam'].'</td><td class="medewerker GSM">'.$list_data['GSM'].'</td><td>'.$button.'</td></tr>';																		
 									} else {
 										$list_data = array('wegentoezichters-vroeg' => '', 'wegentoezichters-laat' => '', 'arbeiders-vroeg' => '', 'arbeiders-laat' => '');
 										if (array_key_exists('arbeiders-vroeg', $lijsten_arr['permanentie']['week_'.$i][$key])){
