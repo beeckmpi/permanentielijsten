@@ -166,11 +166,11 @@ class lijstenController extends \lithium\action\Controller {
 		$login = Auth::check('member');
 		$lijsten = Lijsten::find('first', array('conditions' => array('type' => $type, 'subtype' => $subtype, 'districtscode' => $districtscode, 'Startdatum' => array('$gte' => $startjaar.'-01-01', '$lte' => $startjaar.'-12-31'))));
 		$lijsten_arr = $lijsten->data();
-		$personeel = array();
+		$personeel_lijst = array();
 		foreach ($lijsten->personeel as $personeelslid){
-			$personeel[] = array('naam' => $personeelslid->naam, 'GSM' => $personeelslid->GSM);
+			$personeel_lijst[] = array('naam' => $personeelslid->naam, 'GSM' => $personeelslid->GSM);
 		}
-		usort($personeel, function($a, $b)
+		usort($personeel_lijst, function($a, $b)
 		{
 		     return strcmp($a["naam"], $b["naam"]);
 		});
@@ -179,7 +179,7 @@ class lijstenController extends \lithium\action\Controller {
 		$breadcrumb = self::$breadcrumb;
 		$breadcrumb[] = array('naam' => 'Lijsten bekijken');
 		$url = $this->request->env('base');
-		return compact('login', 'lijsten', 'lijsten_arr', 'personeel', 'locatie', 'actief', 'breadcrumb', 'url');
+		return compact('login', 'lijsten', 'lijsten_arr', 'personeel_lijst', 'locatie', 'actief', 'breadcrumb', 'url');
 	}
 
 	public function view($type, $subtype, $districtscode, $startjaar)

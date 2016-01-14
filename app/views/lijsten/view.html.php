@@ -57,7 +57,7 @@
 								<th width="2%">Van</th>
 								<th width="2%">Tot</th>
 								<th width="47%">Wegentoezichters</th>
-								<th width="47%">Arbeiders</th>
+								<th width="47%">GSM nummer</th>
 							<?php } else {?>
 								<th width="2%">Week</th>
 								<th colSpan=2>Datum Van - Tot</th>
@@ -121,40 +121,16 @@
 											echo '<td></td><td></td></tr>';
 										}																	
 									} else if ($lijsten->type == "calamiteiten") {
-										$list_data = array('medewerker' => '', 'arbeider' => '');
-										if (array_key_exists('arbeider', $lijsten_arr['permanentie']['week_'.$i][$key])){
-											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['arbeider'] as $number){
-											    if(isset($personeel[$number['naam']])&& $personeel[$number['naam']] != ''){
-                                                   $list_data['arbeider'] .=  '<div><a class="icon-info-sign" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="'.$personeel[$number['naam']].'"></a><div class="hidden GSM">'.$personeel[$number['naam']].'</div>&nbsp;&nbsp;';
-                                                }			
-												if(isset($number['naam'])){
-												    if ($list_data['arbeider'] == ''){
-												        $list_data['arbeider'] = '<div>';
-												    }
-													$list_data['arbeider'] .=  '<span class="naam">'.$number['naam'].'</span>';												
-												}                                                 
-                                                if(isset($number['naam'])){
-                                                    $list_data['arbeider'] .= '</div>';
-                                                }
-											}
-										}
 										if (array_key_exists('medewerker', $lijsten_arr['permanentie']['week_'.$i][$key])){
-											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['medewerker'] as $number){
-											    if(isset($personeel[$number['naam']])&& $personeel[$number['naam']] != ''){
-                                                   $list_data['medewerker'] .=  ' <div><a class="icon-info-sign" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="'.$personeel[$number['naam']].'"></a><div class="hidden GSM">'.$personeel[$number['naam']].'</div>&nbsp;&nbsp;';
-                                                }   
-												if(isset($number['naam'])){
-												    if ($list_data['medewerker'] == ''){
-                                                        $list_data['medewerker'] = '<div>';
-                                                    }
-													$list_data['medewerker'] .=  '<span class="naam">'.$number['naam'].'</span></div>';												
-												}                                               
+											$list_data = array('naam' => '', 'GSM' => '');
+                                            foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['medewerker'] as $number){            
                                                 if(isset($number['naam'])){
-                                                    $list_data['medewerker'] .= '</div>';
-                                                }										
-											}
-										}
-										echo '<td>'.$list_data['medewerker'].'</td><td>'.$list_data['arbeider'].'</td></tr>';																			
+                                                    $list_data['naam'] .=  '<div><span class="naam">'.$number['naam'].'</span><div class="hidden GSM">'.$personeel[$number['naam']].'</div></div>';
+                                                    $list_data['GSM'] .= '<div>'.$personeel[$number['naam']].'</div>';
+                                                }                                           
+                                            }
+                                            echo '<td>'.$list_data['naam'].'</td><td>'.$list_data['GSM'].'</td></tr>';
+										}																		
 									} else {									 
 										$list_data = array('wegentoezichters-vroeg' => '', 'wegentoezichters-laat' => '', 'arbeiders-vroeg' => '', 'arbeiders-laat' => '');
 										if (array_key_exists('arbeiders-vroeg', $lijsten_arr['permanentie']['week_'.$i][$key])){

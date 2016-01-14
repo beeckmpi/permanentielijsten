@@ -59,9 +59,9 @@
 								<th width="86px">Van</th>
 								<th width="86px">Tot</th>
 								<th width="47%">Wegentoezichters</th>
-								<th width="47%">Arbeiders</th>
+								<th width="47%">GSM</th>
 							<?php } else {?>
-								<th width="61px">Week</th>
+								<th>Week</th>
 								<th colSpan=2>Datum Van - Tot</th>
 								<th colSpan=2>Wegentoezichters</th>
 								<th colSpan=2>Lader/Technisch assistent</th>
@@ -69,8 +69,8 @@
 							</tr>
 							<tr>
 								<th>Week</th>
-								<th width="2%">Van</th>
-								<th width="2%">Tot</th>
+								<th>Van</th>
+								<th>Tot</th>
 								<th>08.00u - 20.00u</th>
 								<th>20.00u - 08.00u</th>
 								<th>08.00u - 20.00u</th>
@@ -96,6 +96,10 @@
 				    			}
 								$y = $i;
 								$y++;
+                                $personeel = array();
+                                foreach ($lijsten_arr['personeel'] as $persoon) {
+                                    $personeel[$persoon['naam']] = $persoon['GSM'];
+                                };
 								usort($lijsten_arr['permanentie']['week_'.$i], "cmp");
 								foreach ($lijsten_arr['permanentie']['week_'.$i] as $key => $value){
 									asort($value);
@@ -131,22 +135,16 @@
 											echo '<td class="leidingevende dropable"></td><td class="leidingevende GSM"></td><td>'.$button.'</td></tr>';
 										}																	
 									} else if ($lijsten->type == "calamiteiten") {
-										$list_data = array('medewerker' => '', 'arbeider' => '');
-										if (array_key_exists('arbeider', $lijsten_arr['permanentie']['week_'.$i][$key])){
-											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['arbeider'] as $number){			
-												if(isset($number['naam'])){
-													$list_data['arbeider'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span></div>';												
-												} 
-											}
-										}
+										$list_data = array('medewerker' => '', 'GSM' => '');										
 										if (array_key_exists('medewerker', $lijsten_arr['permanentie']['week_'.$i][$key])){
 											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['medewerker'] as $number){
 												if(isset($number['naam'])){
-													$list_data['medewerker'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span></div>';												
+													$list_data['naam'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span><div class="hidden GSM">'.$personeel[$number['naam']].'</div></div>';
+                                                    $list_data['GSM'] .= '<div class="element GSM_element">'.$personeel[$number['naam']].'</div>';												
 												} 												
 											}
 										}
-										echo '<td class="medewerker dropable">'.$list_data['medewerker'].'</td><td class="arbeider dropable">'.$list_data['arbeider'].'</td><td>'.$button.'</td></tr>';																			
+										echo '<td class="medewerker dropable">'.$list_data['naam'].'</td><td class="leidingevende GSM">'.$list_data['GSM'].'</td><td>'.$button.'</td></tr>';																		
 									} else {
 										$list_data = array('wegentoezichters-vroeg' => '', 'wegentoezichters-laat' => '', 'arbeiders-vroeg' => '', 'arbeiders-laat' => '');
 										if (array_key_exists('arbeiders-vroeg', $lijsten_arr['permanentie']['week_'.$i][$key])){
@@ -198,7 +196,7 @@
 					<div class="viewport">
 						<div class="overview">
 				    		<ul id="werknemers">	 
-				    			<?php foreach($personeel as $key){?>
+				    			<?php foreach($personeel_lijst as $key){?>
 				    				<?php if($key['GSM'] != ''){?>
 				    					<li class="drag well" draggable="true"><span class="icon-move" style="margin-right: 5px"></span><span class="naam"><?=$key['naam']?></span><span class="icon-remove-sign"></span><span class="icon-pencil"></span><a class="icon-info-sign" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="<?=$key['GSM']?>"></a><div class="hidden GSM"><?=$key['GSM']?></div></li>
 				    				<?php } else {?>

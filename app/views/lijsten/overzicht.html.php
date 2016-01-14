@@ -3,7 +3,7 @@
 $calamiteiten_leidinggevenden = array();
 $calamiteiten_medewerkers = array();
 $winterdienst = array();
-$weeknr = date('W', time());
+$weeknr = (int) date('W', time());
 foreach ($lijsten as $key => $value) {
     if ($lijsten[$key]['type'] == 'calamiteiten') {
         if ($lijsten[$key]['subtype'] == 'leidinggevenden') {

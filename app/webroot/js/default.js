@@ -60,9 +60,14 @@ $(document).ready(function(){
 	    
 	});
 	var viewport_h = $('#scrollbar1 .viewport').css('height');
+	$('th').each(function(){
+    var thWidth = $(this).css('width');
+    $(this).css('width', thWidth);
+  });
 	$(window).scroll(function(){
 		var top = $(document).scrollTop();
 		var table_w = $('#permanentie_tabel').width();
+		
 		
 		if(top >= 135){
 			$('#scrollbar1').css('position', 'fixed').css('top', '0px').css('height', '96%');
@@ -71,7 +76,7 @@ $(document).ready(function(){
 			$('#scrollbar1').tinyscrollbar_update();
 			
 			if(!$('#permanentie_tabel2').hasClass('cloned')){
-				$('#permanentie_tabel').clone().addClass('cloned').attr('id', 'permanentie_tabel2').prependTo('.span9').removeClass('table-striped').css('position', 'fixed').css('top', '0px').css('width', table_w);
+				$('#permanentie_tabel').clone().addClass('cloned').attr('id', 'permanentie_tabel2').prependTo('.span9').removeClass('table-striped').css('position', 'fixed').css('top', '0px').css('z-index', '50').css('width', table_w);
 				$('#permanentie_tabel2 tbody').hide();	
 				$('#permanentie_tabel2 tbody tr').removeAttr('id');	
 			}
