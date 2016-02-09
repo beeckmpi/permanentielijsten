@@ -11,7 +11,7 @@
 			        		0 		=> 'Alle provincies', 
 			        		'WA' 	=> 'Antwerpen', 
 			        		'AWVB' 	=> 'Brussel', 
-			        		'WL' 	=> 'Limburg', 
+			        		'AWVL' 	=> 'Limburg', 
 			        		'WOV'   => 'Oost-Vlaanderen', 
 			        		'PCO' 	=> 'PCO', 
 			        		'WVB' => 'Vlaams Brabant', 

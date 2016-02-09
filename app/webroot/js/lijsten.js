@@ -115,9 +115,7 @@ $(function() {
 		$('#week_add_form').children('#week').val(id);
 		begin_datum_array[0] = parseInt(begin_datum_array[0])+1;
 		eind_datum_array[0] = parseInt(eind_datum_array[0])-1;
-		if (!Modernizr.inputtypes['date']) {
-			$('#tussendatum').datepicker({ dateFormat: 'dd/mm/yy', firstDay: 1, constrainInput: true, minDate: (new Date(begin_datum_array[2]+','+begin_datum_array[1]+','+begin_datum_array[0])), maxDate: new Date(eind_datum_array[2]+','+eind_datum_array[1]+','+eind_datum_array[0]) });
-		}
+		$('#tussendatum').datepicker({ dateFormat: 'dd/mm/yy', firstDay: 1, constrainInput: true, minDate: (new Date(begin_datum_array[2]+','+begin_datum_array[1]+','+begin_datum_array[0])), maxDate: new Date(eind_datum_array[2]+','+eind_datum_array[1]+','+eind_datum_array[0]) });
 		$('#myModal_add_row').modal('show');
 	});
 	$(document).on('click', 'li .icon-remove-sign', function(e){
@@ -177,7 +175,7 @@ $(function() {
 					$(this).remove();
 				});
 			}
-		})
+		});
 		$(this).parent().fadeOut('slow', function(){			
 			$(this).remove();		
 		});		
