@@ -40,9 +40,6 @@ $(function() {
 					if(data.subtype == "leidinggevenden" || data.subtype == "provinciaal"){					
 						data.GSM = $(this).children('.element:last').children('.GSM').html();
 					} else if(data.type == "calamiteiten" && data.subtype == "medewerkers"){
-					  if ($(this).hasClass('medewerker')){
-              data.personeelstype = 'medewerker';
-            }
 						data.GSM = $(this).children('.element:last').children('.GSM').html();
 					} else if(data.type == "winterdienst" && data.subtype == "medewerkers"){	
 						if ($(this).hasClass('wegentoezichters-vroeg')){
@@ -115,7 +112,9 @@ $(function() {
 		$('#week_add_form').children('#week').val(id);
 		begin_datum_array[0] = parseInt(begin_datum_array[0])+1;
 		eind_datum_array[0] = parseInt(eind_datum_array[0])-1;
-		$('#tussendatum').datepicker({ dateFormat: 'dd/mm/yy', firstDay: 1, constrainInput: true, minDate: (new Date(begin_datum_array[2]+','+begin_datum_array[1]+','+begin_datum_array[0])), maxDate: new Date(eind_datum_array[2]+','+eind_datum_array[1]+','+eind_datum_array[0]) });
+		if (!Modernizr.inputtypes['date']) {
+			$('#tussendatum').datepicker({ dateFormat: 'dd/mm/yy', firstDay: 1, constrainInput: true, minDate: (new Date(begin_datum_array[2]+','+begin_datum_array[1]+','+begin_datum_array[0])), maxDate: new Date(eind_datum_array[2]+','+eind_datum_array[1]+','+eind_datum_array[0]) });
+		}
 		$('#myModal_add_row').modal('show');
 	});
 	$(document).on('click', 'li .icon-remove-sign', function(e){
@@ -258,7 +257,20 @@ $(function() {
 	$(document).on('change', 'select[name="type"], select[name="provincie"], select[name="District"]', function(event){
 		changeFilter();
 	});
-	
+	var d = new Date();
+	var n = d.getFullYear();
+	$('#Jaar option[value="2016"]').prop('selected', true);
+	$(document).on('change', 'select[name="Jaar"]', function(event){
+		var url = window.location.href;
+		var url_arr = url.split('/lijsten/');
+		var hrefl = url_arr[0]+'/lijsten/get_feestdagen/'+$('select[name="Jaar"] option:selected').val()+'/';
+		$.getJSON(hrefl, function(json){
+			$.each(json.feestdagen.data, function(name, date){
+				$('input[name="'+name+'"]').val(date);
+				$('#message').html('<span style="color:red; border: 1px solid red; padding: 2px 5px">'+json.message+'</span>');
+			});
+		});
+	});
 	function changeFilter(){
 		var url = window.location.href;
 		var url_arr = url.split('/lijsten');

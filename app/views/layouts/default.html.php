@@ -40,6 +40,8 @@
 						<li role="presentation" class="divider"></li>
 						<li><?=$this->html->link('Lijst toevoegen', 'lijsten/add')?></li>
 						<li><?=$this->html->link('Lijsten Beheren', 'lijsten/beheren')?></li>
+						<li role="presentation" class="divider"></li>
+						<li><?=$this->html->link('Feestdagen beheren', 'lijsten/feestdagen')?></li>
 					</ul>
 				</li>
 				

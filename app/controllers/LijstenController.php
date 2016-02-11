@@ -4,6 +4,7 @@ namespace app\controllers;
 use lithium\security\Auth;
 //use PHPWord;
 use app\models\Lijsten;
+use app\models\Feestdagen;
 use app\models\Locations;
 
 class lijstenController extends \lithium\action\Controller {
@@ -461,6 +462,85 @@ class lijstenController extends \lithium\action\Controller {
 		$breadcrumb = self::$breadcrumb;
 		$breadcrumb[] = array('naam' => 'Lijsten bekijken');
 		return compact('login', 'actief', 'breadcrumb', 'locaties');
+	}
+	
+	public function get_feestdagen($year=2016){
+		$login = Auth::check('member');
+		$feestdagen = Feestdagen::find('first', array('conditions' => array('Jaar' => $year)));
+		$message = '';
+		if(is_object($feestdagen)){
+			foreach($feestdagen['data'] as $feestdag => $datum){
+				$feestdagen['data'][$feestdag] =  date('Y-m-d', $datum->sec);
+			}
+		} else {
+			$feestdagen['data']["Nieuwjaar"] = date('Y-m-d', strtotime($year.'-01-01'));
+			$feestdagen['data']["Paasmaandag"] = date('Y-m-d',strtotime($year.'-04-01'));
+			$feestdagen['data']["Feest_van_de_arbeid"] = date('Y-m-d',strtotime($year.'-04-01'));
+			$feestdagen['data']["olhh"] = date('Y-m-d',strtotime($year.'-05-01'));
+			$feestdagen['data']["Pinkstermaandag"] = date('Y-m-d',strtotime($year.'-05-15'));
+			$feestdagen['data']["Feest_van_de_vlaamse_gemeenschap"] = date('Y-m-d',strtotime($year.'-07-11'));
+			$feestdagen['data']["nationale_feestdag"] = date('Y-m-d',strtotime($year.'-07-21'));
+			$feestdagen['data']["olvh"] = date('Y-m-d',strtotime($year.'-06-15'));
+			$feestdagen['data']["Allerheiligen"] = date('Y-m-d',strtotime($year.'-11-01'));
+			$feestdagen['data']["Allerzielen"] = date('Y-m-d',strtotime($year.'-11-02'));
+			$feestdagen['data']["Kerstdag"] = date('Y-m-d',strtotime($year.'-12-25'));
+			$feestdagen['data']["Kerstverlof1"] = date('Y-m-d',strtotime($year.'-12-26'));
+			$feestdagen['data']["Kerstverlof2"] = date('Y-m-d',strtotime($year.'-12-27'));
+			$feestdagen['data']["Kerstverlof3"] = date('Y-m-d',strtotime($year.'-12-28'));
+			$feestdagen['data']["Kerstverlof4"] = date('Y-m-d',strtotime($year.'-12-29'));
+			$feestdagen['data']["Kerstverlof5"] = date('Y-m-d',strtotime($year.'-12-30'));
+			$feestdagen['data']["Kerstverlof6"] = date('Y-m-d',strtotime($year.'-12-31'));
+			$message = 'De feestdagen van '.$year.' zijn nog niet ingevoerd.';
+		}
+		return compact('feestdagen', 'message');
+	}
+	
+	public function feestdagen($year = '') {
+		$login = Auth::check('member');
+		$message = '';
+		if($year == ''){
+			$year = date('Y');
+		}
+		if ($this->request->data){
+			$this->request->data['data']["Nieuwjaar"] = new \MongoDate( strtotime($this->request->data['Jaar'].'-01-01'));
+			$this->request->data['data']["Paasmaandag"] = new \MongoDate(strtotime($this->request->data['Paasmaandag']));
+			$this->request->data['data']["Feest_van_de_arbeid"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-04-01'));
+			$this->request->data['data']["olhh"] = new \MongoDate(strtotime($this->request->data['olhh']));
+			$this->request->data['data']["Pinkstermaandag"] = new \MongoDate(strtotime($this->request->data['Pinkstermaandag']));
+			$this->request->data['data']["Feest_van_de_vlaamse_gemeenschap"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-07-11'));
+			$this->request->data['data']["nationale_feestdag"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-07-21'));
+			$this->request->data['data']["olvh"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-06-15'));
+			$this->request->data['data']["Allerheiligen"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-11-01'));
+			$this->request->data['data']["Allerzielen"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-11-02'));
+			$this->request->data['data']["Kerstdag"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-12-25'));
+			$this->request->data['data']["Kerstverlof1"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-12-26'));
+			$this->request->data['data']["Kerstverlof2"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-12-27'));
+			$this->request->data['data']["Kerstverlof3"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-12-28'));
+			$this->request->data['data']["Kerstverlof4"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-12-29'));
+			$this->request->data['data']["Kerstverlof5"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-12-30'));
+			$this->request->data['data']["Kerstverlof6"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-12-31'));
+			$feestdagen = Feestdagen::find('first', array('conditions' => array('Jaar' => $this->request->data['Jaar'])));
+			if (is_object($feestdagen)){
+				$feestdagen = $this->request->data;
+				if($feestdagen->save()){
+					$message = 'Feestdagen van '.$this->request->data['Jaar'].' zijn bewaard.';
+				}	
+			} else {
+				$feestdagen = Feestdagen::create($this->request->data);
+				if($feestdagen->save()){
+					$message = 'Feestdagen van '.$this->request->data['Jaar'].' zijn toegevoegd aan de databank.';
+				}
+			}					
+		} else {
+			$feestdagen = Feestdagen::find('first', array('conditions' => array('Jaar' => $year)));
+			if(!is_object($feestdagen)){
+				$feestdagen = Feestdagen::create();
+			}
+		}
+		$actief = self::$actief;
+		$breadcrumb = self::$breadcrumb;
+		$breadcrumb[] = array('naam' => 'Feestdagen bekijken');
+		return compact('login', 'actief', 'breadcrumb', 'feestdagen', 'message');
 	}
 	
 	public function export($type, $id){

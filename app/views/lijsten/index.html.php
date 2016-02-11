@@ -12,10 +12,10 @@
 			        		'WA' 	=> 'Antwerpen', 
 			        		'AWVB' 	=> 'Brussel', 
 			        		'AWVL' 	=> 'Limburg', 
-			        		'WOV'   => 'Oost-Vlaanderen', 
+			        		'WOV' => 'Oost-Vlaanderen', 
 			        		'PCO' 	=> 'PCO', 
-			        		'WVB' => 'Vlaams Brabant', 
-			        		'WVB' => 'West-Vlaanderen'
+			        		'AWVVB' => 'Vlaams Brabant', 
+			        		'AWVWV' => 'West-Vlaanderen'
 								);
 			?>
 	<div style="display: inline-block">

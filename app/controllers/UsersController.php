@@ -30,21 +30,17 @@ class UsersController extends \lithium\action\Controller {
 
     public function add() {
     	$login = Auth::check('member');
-		$user = Users::find('first', array('conditions' => array('username' => $login['username'])));
-    	if ($login['rol']!='administrator' && ($user->username != $login->username)){
+    	if ($login['rol']!='administrator'){
 			return $this->redirect('/');
 		}    	
-        if ($this->request->data) {
-        	unset($this->request->data['repeat_password']);
-			unset($this->request->data['user_ok']);
-			unset($this->request->data['password_ok']);
-        	$location = Locations::find('first', array('conditions' => array('district' => $this->request->data['location'])));
-			$this->request->data['provincie'] = $location->district;
-	        $user = Users::create($this->request->data);
+    	unset($this->request->data['repeat_password']);
+		unset($this->request->data['user_ok']);
+		unset($this->request->data['password_ok']);
+        $user = Users::create($this->request->data);
+
+        if (($this->request->data) && $user->save()) {
             $users = Users::all();
-			if ($user->save()){
-        		
-			}
+        	return compact('users');
         }
 		$locations = Locations::find('all', array('order' => array('district' => 'ASC')));	
 		foreach ($locations as $key => $location){
