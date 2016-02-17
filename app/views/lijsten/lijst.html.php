@@ -6,45 +6,32 @@
 		<div style="margin-left:20px; font-size: 25px; margin-bottom: 50px;">Permanentielijsten bewerken werkt enkel in <strong>Mozilla Firefox of Google Chrome</strong>!</div>
 <![endif]--> 
 <!--[if !IE]>--><?php if (($login['rol'] == 'administrator') || ($login['location'] == $lijsten->district) || (strpos($login['location'], 'Alle districten') !== false && $login['provincie'] == $lijsten->provincie)){ ?>
-	
-    <div style="clear:both"></div>
     <div class="container-fluid">
-	    <div class="row-fluid">
-	    	<div class="span12">
-	    		<div class="btn-group" style="float:right">
-				    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-				    Exporteren
-				    <span class="caret"></span>
-				    </a>
-				    <ul class="dropdown-menu pull-right">
-						<li>
-							<?=$this->html->link('CSV', '/lijsten/export/csv/'.$lijsten->_id)?>
-						</li>
-						<li>
-							<?=$this->html->link('MS Word', 'lijsten/export/doc/'.$lijsten->_id);?>
-						</li>
-						<li>
-							<a href="#">HTML</a>
-						</li>
-				    </ul>
-				    <?=$this->html->link('Bekijken', 'lijsten/view/'.$lijsten->type.'/'.$lijsten->subtype.'/'.$lijsten->districtscode.'/'.date('Y', $lijsten->Startdatum->sec), array('class' => 'btn'))?>
+	    <div class="row">
+	    	<div class="col-md-9">
+	    		<div class="dropdown" style="float:right">
+				    <?=$this->html->link('Bekijken', 'lijsten/view/'.$lijsten->type.'/'.$lijsten->subtype.'/'.$lijsten->districtscode.'/'.date('Y', $lijsten->Startdatum->sec), array('class' => 'btn btn-info'))?>
 			    </div>
 			    
 			<?php if ($lijsten->type == "calamiteiten" && $lijsten->subtype == "leidinggevenden"){?>   
-				<h4>Beurtrol <?=$lijsten->subtype?> <?=$lijsten->type?> wachtdienst (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
-			<?php } else if ($lijsten->subtype == 'provinciaal') {?>
-				<h4>Beurtrol Provinciaal CoÃ¶rdinator (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
-			<?php } else if ($lijsten->subtype == 'EM') {?>
-				<h4>Beurtrol Permanentie Sectie EM (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
-			<?php } else { ?>
-				<h4>Permanentielijst - <?=$locatie->district?> - <?=$locatie->districtnummer?> - <?=$lijsten->subtype?> <?=$lijsten->type?> (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
-			<?php } ?>	    
+                <?php if (strstr($lijsten->district, 'Alle districten') !== FALSE){?>
+                    <h4>Beurtrol <?=$lijsten->subtype?> <?=$lijsten->type?> wachtdienst (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
+                <?php } else { ?>
+                    <h4>Beurtrol <?=$lijsten->subtype?> <?=$lijsten->type?> wachtdienst - <?=$locatie->district?> - <?=$locatie->districtnummer?> (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
+                <?php } ?>
+            <?php } else if ($lijsten->subtype == 'provinciaal') {?>
+                <h4>Beurtrol Provinciaal Coördinator (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
+            <?php } else if ($lijsten->subtype == 'EM') {?>
+                <h4>Beurtrol Permanentie Sectie EM (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
+            <?php } else { ?>
+                <h4>Permanentielijst - <?=$locatie->district?> - <?=$locatie->districtnummer?> - <?=$lijsten->subtype?> <?=$lijsten->type?> (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
+            <?php } ?>   
 	    	</div>
 	    </div>	
-	    <div class="row-fluid">
+	    <div class="row">
 	    	
-	    	<div class="span9">	
-				<table id="permanentie_tabel" class="table-striped" data-url="add_permanentie/<?=$lijsten->_id?>" data-deleteurl="delete_permanentie/<?=$lijsten->_id?>" data-type="<?=$lijsten->type?>" data-subtype="<?=$lijsten->subtype?>">
+	    	<div class="col-md-9">	
+				<table id="permanentie_tabel" class="table table-striped" data-url="add_permanentie/<?=$lijsten->_id?>" data-deleteurl="delete_permanentie/<?=$lijsten->_id?>" data-type="<?=$lijsten->type?>" data-subtype="<?=$lijsten->subtype?>">
 					<div class="tabel_t">
 					<thead>
 						<tr>
@@ -76,7 +63,7 @@
 								<th>08.00u - 20.00u</th>
 								<th>20.00u - 08.00u</th>
 							<?php } ?>
-							<th width="7%"><span class="icon-plus-sign"></span></th>
+							<th width="7%"><span class="glyphicon glyphicon-plus"></span></th>
 							</tr>			
 					</thead>
 					<tbody>
@@ -104,13 +91,13 @@
 									asort($value);
 									echo '<tr id="week_'.$i.'_'.$key.'">';
 									if($key==0){
-										$button = '<button class="btn btn-mini plus"><span class="icon-plus"></span></button>';
-										echo '<td class="week">'.$i.'</td>';
+										$button = '<button class="btn btn-default btn-xs plus" ><span class="glyphicon glyphicon-plus"></span></button>';
+										echo '<td class="week"><div class="element">'.$i.'</div></td>';
 									} else {
-										$button =  '<div class="btn-group">
-												  <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
-												    <span class="icon-edit"></span>
-												  </a>
+										$button =  '<div class="dropdown">
+												  <button class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" href="#">
+												    <span class="glyphicon glyphicon-edit"></span>
+												  </button>
 												  <ul class="dropdown-menu pull-right">
 												    <li><a href="#nieuweLijn" class="add_row">Nieuwe Lijn...</a></li>
 												    <li>'.$this->html->link('Lijn verwijderen...', 'lijsten/permanentie_week_remove/'.$lijsten->_id, array('class' => 'remove_row')).'</li>
@@ -118,14 +105,14 @@
 												</div>';
 										echo '<td class="week"></td>';
 									}							
-									echo '<td class="van">'.date('d/m/Y', $lijsten_arr['permanentie']['week_'.$i][$key]['startdatum']).'</td>';
-									echo '<td class="tot">'.date('d/m/Y',$lijsten_arr['permanentie']['week_'.$i][$key]['einddatum']).'</td>';
+									echo '<td class="van"><div class="element">'.date('d/m/Y', $lijsten_arr['permanentie']['week_'.$i][$key]['startdatum']).'</div></td>';
+									echo '<td class="tot"><div class="element">'.date('d/m/Y',$lijsten_arr['permanentie']['week_'.$i][$key]['einddatum']).'</div></td>';
 									if ($lijsten->subtype == "leidinggevenden" || $lijsten->subtype == "provinciaal" || $lijsten->subtype == "EM"){
 										if (array_key_exists('personeelslid', $lijsten_arr['permanentie']['week_'.$i][$key])){
 											$list_data = array('naam' => '', 'GSM' => '');
 											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['personeelslid'] as $number){			
 												if(isset($number['naam'])){
-													$list_data['naam'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span><div class="hidden GSM">'.$number['GSM'].'</div></div>';
+													$list_data['naam'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="glyphicon glyphicon-remove-sign"></span><div class="hidden GSM">'.$number['GSM'].'</div></div>';
 													$list_data['GSM'] .= '<div class="element GSM_element">'.$number['GSM'].'</div>';
 												} 											
 											}
@@ -138,7 +125,7 @@
 											$list_data = array('medewerker' => '', 'GSM' => '');
 											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['medewerker'] as $number){
 												if(isset($number['naam'])){
-													$list_data['medewerker'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span><div class="hidden GSM">'.$personeel[$number['naam']].'</div></div>';
+													$list_data['medewerker'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="glyphicon glyphicon-remove-sign"></span><div class="hidden GSM">'.$personeel[$number['naam']].'</div></div>';
 													$list_data['GSM'] .= '<div class="element GSM_element">'.$personeel[$number['naam']].'</div>';												
 												} 												
 											}
@@ -149,28 +136,28 @@
 										if (array_key_exists('arbeiders-vroeg', $lijsten_arr['permanentie']['week_'.$i][$key])){
 											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['arbeiders-vroeg'] as $number){			
 												if(isset($number['naam'])){
-													$list_data['arbeiders-vroeg'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span></div>';												
+													$list_data['arbeiders-vroeg'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="glyphicon glyphicon-remove-sign"></span></div>';												
 												} 
 											}
 										}
 										if(array_key_exists('arbeiders-laat', $lijsten_arr['permanentie']['week_'.$i][$key])){
 											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['arbeiders-laat'] as $number){			
 												if(isset($number['naam'])){
-													$list_data['arbeiders-laat'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span></div>';												
+													$list_data['arbeiders-laat'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="glyphicon glyphicon-remove-sign"></span></div>';												
 												} 
 											}
 										}
 										if (array_key_exists('wegentoezichters-vroeg', $lijsten_arr['permanentie']['week_'.$i][$key])) {
 											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['wegentoezichters-vroeg'] as $number){
 												if(isset($number['naam'])){
-													$list_data['wegentoezichters-vroeg'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span></div>';												
+													$list_data['wegentoezichters-vroeg'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="glyphicon glyphicon-remove-sign"></span></div>';												
 												} 												
 											}
 										}
 										if (array_key_exists('wegentoezichters-laat', $lijsten_arr['permanentie']['week_'.$i][$key])){
 											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['wegentoezichters-laat'] as $number){
 												if(isset($number['naam'])){
-													$list_data['wegentoezichters-laat'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="icon-remove-sign"></span></div>';												
+													$list_data['wegentoezichters-laat'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="glyphicon glyphicon-remove-sign"></span></div>';												
 												} 												
 											}
 										}
@@ -189,7 +176,7 @@
 					</div>
 				</table>
 			</div>	
-			<div class="span3">
+			<div class="col-md-3">
 	    		<div id="scrollbar1">
 	    			<div class="scrollbar"><div class="track"><div class="thumb"><div class="end"></div></div></div></div>
 					<div class="viewport">
@@ -197,17 +184,17 @@
 				    		<ul id="werknemers">	 
 				    			<?php foreach($personeel_lijst as $key){?>
 				    				<?php if($key['GSM'] != ''){?>
-				    					<li class="drag well" draggable="true"><span class="icon-move" style="margin-right: 5px"></span><span class="naam"><?=$key['naam']?></span><span class="icon-remove-sign"></span><span class="icon-pencil"></span><a class="icon-info-sign" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="<?=$key['GSM']?>"></a><div class="hidden GSM"><?=$key['GSM']?></div></li>
+				    					<li class="drag well" draggable="true"><span class="glyphicon glyphicon-move" style="margin-right: 5px"></span><span class="naam"><?=$key['naam']?></span><span class="glyphicon glyphicon-remove-sign"></span><span class="glyphicon glyphicon-pencil"></span><a class="icon-info-sign" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="<?=$key['GSM']?>"></a><div class="hidden GSM"><?=$key['GSM']?></div></li>
 				    				<?php } else {?>
-				    					<li class="drag well" draggable="true"><span class="icon-move" style="margin-right: 5px"></span><span class="naam"><?=$key['naam']?></span><span class="icon-remove-sign"></span><span class="icon-pencil"></span></li>
+				    					<li class="drag well" draggable="true"><span class="glyphicon glyphicon-move" style="margin-right: 5px"></span><span class="naam"><?=$key['naam']?></span><span class="glyphicon glyphicon-remove-sign"></span><span class="glyphicon glyphicon-pencil"></span></li>
 				    			<?php }} ?>							
 							</ul>	
 							<div class="hidden" id="deleteurl">remove_personeelslid/<?=$lijsten->_id?></div>
 							<div id="wn_toevoegen" style="margin-top: 10px;">
 								<form id="wn_form" action="add_personeelslid/<?=$lijsten->_id?>" style="margin-bottom:0px;">
-									<input type="text" id="personeel" placeholder="Naam toevoegen" required="true" name="naam" val=""><br />
-									<input type="text" id="GSM" placeholder="GSM nummer toevoegen" required="true" name="gsmnummer" val="">
-									<input type="submit" value="toevoegen" id="personeel_toevoegen" class="btn" style="margin: 0px 0px; width: 100%">
+									<input type="text"  class="form-control" id="personeel" placeholder="Naam toevoegen" required="true" name="naam" val="" style="margin: 3px 0">
+									<input type="text" class="form-control" id="GSM" placeholder="GSM nummer toevoegen" required="true" name="gsmnummer" val="" style="margin: 3px 0">
+									<input type="submit" value="toevoegen" id="personeel_toevoegen" class="btn btn-default">
 								</form>
 							</div>
 						</div>						
@@ -216,48 +203,56 @@
 				</div>
 	    	</div>
 	    </div>
-		<div id="myModal_personeel" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-		    <div class="modal-header">
-			    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-		    	<h3>Persoon bewerken</h3>
-		    </div>
-		    <div class="modal-body">
-		    	<p>
-		    	<form id="wn_edit_form" action="edit_permanentie/<?=$lijsten->_id?>">
-		    		<label for="naam">Naam</label>
-					<input type="text" id="personeel_bewerken" placeholder="Naam toevoegen"required="true" name="naam" val=""><br />
-					<input type="hidden" id="personeel_old" placeholder="Naam toevoegen" name="old_naam" val="">
-					<label for="gsmnummer">GSM</label>
-					<input type="text" id="GSM_bewerken" placeholder="GSM nummer toevoegen" required="true" name="gsmnummer" val="">
-					<input type="hidden" id="GSM_old" placeholder="GSM nummer toevoegen" name="old_gsmnummer" val="">
-				</form>
-				</p>
-		    </div>
-		    <div class="modal-footer">
-		    	<a href="#" class="btn close_modal">Sluiten</a>
-		    	<a href="#" class="btn btn-primary save_modal">Bewaren</a>
-		    </div>
+		<div id="myModal_personeel" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		    <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+        			    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        		    	<h3>Persoon bewerken</h3>
+        		    </div>
+        		    <div class="modal-body">
+        		    	<p>
+        		    	<form id="wn_edit_form" action="edit_permanentie/<?=$lijsten->_id?>">
+        		    		<label for="naam">Naam</label>
+        					<input type="text" id="personeel_bewerken"  class="form-control" placeholder="Naam toevoegen"required="true" name="naam" val=""><br />
+        					<input type="hidden" id="personeel_old" placeholder="Naam toevoegen" name="old_naam" val="">
+        					<label for="gsmnummer">GSM</label>
+        					<input type="text" id="GSM_bewerken"  class="form-control" placeholder="GSM nummer toevoegen" required="true" name="gsmnummer" val="">
+        					<input type="hidden" id="GSM_old" placeholder="GSM nummer toevoegen" name="old_gsmnummer" val="">
+        				</form>
+        				</p>
+        		    </div>
+        		    <div class="modal-footer">
+        		    	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary save_modal">Bewaren</button>
+        		    </div>
+            	</div>
+            </div>
 		</div>	
-		<div id="myModal_add_row" class="modal hide fade" tabindex="-2" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-		    <div class="modal-header">
-			    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-		    	<h3>Rij toevoegen</h3>
-		    </div>
-		    <div class="modal-body">
-		    	<p>
-		    		<form id="week_add_form" action="permanentie_week_add/<?=$lijsten->_id?>">
-				    	<label for="naam">Tussendatum tussen (<span id="begin_datum_min"></span> en <span id="eind_datum_max"></span>)</label>
-						<input type="text" id="tussendatum" required="true" placeholder="tussendatum toevoegen" name="naam" val="" >
-						<input type="hidden" id="week" name="week" val="">
-						<input type="hidden" id="begin_datum" name="week" val="">
-						<input type="hidden" id="eind_datum" name="week" val="">
-					</form>
-				</p>
-		    </div>
-		    <div class="modal-footer">
-		    	<a href="#" class="btn close_modal">Sluiten</a>
-		    	<a href="#" class="btn btn-primary save_modal">Bewaren</a>
-		    </div>
+		<div id="myModal_add_row" class="modal fade" tabindex="-2" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		    <div class="modal-dialog" role="document">
+		        <div class="modal-content">
+        		    <div class="modal-header">
+        			    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        		    	<h3>Rij toevoegen</h3>
+        		    </div>
+        		    <div class="modal-body">
+        		    	<p>
+        		    		<form id="week_add_form" action="permanentie_week_add/<?=$lijsten->_id?>">
+        				    	<label for="naam">Tussendatum tussen (<span id="begin_datum_min"></span> en <span id="eind_datum_max"></span>)</label>
+        						<input type="text" id="tussendatum" class="form-control" required="true" placeholder="tussendatum toevoegen" name="naam" val="" >
+        						<input type="hidden" id="week" name="week" val="">
+        						<input type="hidden" id="begin_datum" name="week" val="">
+        						<input type="hidden" id="eind_datum" name="week" val="">
+        					</form>
+        				</p>
+        		    </div>
+        		    <div class="modal-footer">
+        		    	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        		    	<button type="button" class="btn btn-primary save_modal">Bewaren</button>
+        		    </div>
+        		</div>
+            </div>
 		</div>	
 		</div>
 	<?php } else { ?>

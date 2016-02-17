@@ -5,7 +5,7 @@
 		}
 		?>
 	<div style="display:inline-block">
-		<?=$this->form->field('type', array('label' => 'Lijst van', 'list' => $types, 'type' => 'select', 'id' => 'lijst_van'));?>
+		<?=$this->form->field('type', array('label' => 'Lijst van', 'class' => 'form-control', 'list' => $types, 'type' => 'select', 'id' => 'lijst_van'));?>
 	</div>
 	<?php $provincies = array(
 			        		0 		=> 'Alle provincies', 
@@ -20,7 +20,7 @@
 			?>
 	<div style="display: inline-block">
 	<label for="provincie">Provincie</label>
-	<select name="provincie" style="width: 220px;">
+	<select name="provincie" style="width: 220px;" class="form-control">
 		<?php foreach ($provincies as $key => $value) { ?>
 			<?php if ($login['provincie'] == $key) {
 				$select = 'selected="selected';
@@ -32,10 +32,10 @@
 	</select>	
 	</div>
 	<div style="display:inline-block">
-	<?=$this->form->field('District', array('label' => 'District', 'list' => $locaties, 'type' => 'select', 'style' => 'display:inline-block'));?>
+	<?=$this->form->field('District', array('label' => 'District', 'class' => 'form-control', 'list' => $locaties, 'type' => 'select', 'style' => 'display:inline-block'));?>
 	</div>
 <div class="row lists">
-	<div class="span6 ">
+	<div class="col-md-4">
 			<div class="nav-header" style="font-size:larger">Calamiteiten</div>
 							
 				<?php foreach($calamiteiten as  $lijst) {?>
@@ -55,7 +55,7 @@
 				<?php }?>               
 			</ul>
 	</div>
-	<div class="span6 ">
+	<div class="col-md-4">
 			<div class="nav-header" style="font-size:larger">Winterdienst</div>		
 				<?php 
 				$medewerkers = array();

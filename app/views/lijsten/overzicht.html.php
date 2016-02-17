@@ -29,7 +29,7 @@ foreach ($lijsten as $key => $value) {
             <h3>Overzicht</h3>
             <h4>Calamiteitenlijsten voor week <?=$weeknr ?></h4>
                 <h5>Beurtrollen Provinciaal Coördinator Permanentie</h5>            
-                <table id="permanentie_tabel" class="table-striped">
+                <table id="permanentie_tabel" class=" table table-striped">
                 	<thead>
                 		<tr>
                 			<th width="30%">Locatie</th>
@@ -83,7 +83,7 @@ foreach ($lijsten as $key => $value) {
                
                 <h5>Beurtrol Districtsmedewerkers</h5>
                
-                <table id="permanentie_tabel" class="table-striped" data-url="<?=$base_url ?>/lijsten/add_permanentie/<?=$lijsten -> _id ?>" data-deleteurl="<?=$base_url ?>/lijsten/delete_permanentie/<?=$lijsten -> _id ?>" data-type="<?=$lijsten -> type ?>" data-subtype="<?=$lijsten -> subtype ?>">
+                <table id="permanentie_tabel" class="table table-striped" data-url="<?=$base_url ?>/lijsten/add_permanentie/<?=$lijsten -> _id ?>" data-deleteurl="<?=$base_url ?>/lijsten/delete_permanentie/<?=$lijsten -> _id ?>" data-type="<?=$lijsten -> type ?>" data-subtype="<?=$lijsten -> subtype ?>">
                     <thead>
                         <tr>
                             <th width="30%">Locatie</th>
@@ -140,7 +140,7 @@ foreach ($lijsten as $key => $value) {
         		<h4>Winterdienstlijsten voor week <?=$weeknr ?></h4>
         		
                 <h5>Beurtrollen Provinciaal Coördinator Winterdienst</h5>
-                <table id="permanentie_tabel" class="table-striped">
+                <table id="permanentie_tabel" class="table table-striped">
                     <thead>
                         <tr>
                             <th width="30%">Locatie</th>
@@ -191,7 +191,7 @@ foreach ($lijsten as $key => $value) {
                    </tbody>
                 </table>
                 <h5>Beurtrollen Leidinggevenden Winterdienst</h5>
-                <table id="permanentie_tabel" class="table-striped">
+                <table id="permanentie_tabel" class="table table-striped">
                     <thead>
                         <tr>
                             <th width="30%">Locatie</th>
@@ -241,7 +241,7 @@ foreach ($lijsten as $key => $value) {
                    </tbody>
                 </table>
                 <h5>Beurtrollen Districtsmedewerkers Winterdienst</h5>
-                <table id="permanentie_tabel" class="table-striped">
+                <table id="permanentie_tabel" class="table table-striped">
                     <thead>
                         <tr>                   
                             <th>Locatie</th>

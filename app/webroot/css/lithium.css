@@ -119,12 +119,7 @@ pre {
 }
 
 /*--- Lists ---*/
-li ul, li ol {
-	margin: 0;
-}
-ul, ol {
-	margin: 0 0 1em 2.75em;
-}
+
 dt, dd {
 	font-style: italic;
 	margin: .5em 0;
@@ -187,73 +182,7 @@ legend {
 	background: #fff;
 	font-size: 22px;
 }
-label {
-	padding: 0 1em 0 0;
-	color: #454545;
-	font-weight: normal;
-}
-input, textarea, button {
-	font-family: Helvetica, Arial, sans-serif;
-	padding: 2px 4px;
-	border: 1px solid #e5e5e5;
-	color: #454545;
-	font-size: 1em;
-	line-height: 1.25em;
-}
-input[type=text], input[type=password], input[type=submit], input[type=file], textarea {
-	clear: both;
-	display: block;
-	padding: .25em .5em;
-}
-input[type=text], input[type=password], input[type=file], textarea {
 
-	max-width: 950px;
-	margin: 0em 0 1em 0;
-	padding: .5em;
-}
-input[type=submit], input[type=button], input[type=reset], button {
-	-moz-border-radius: 4px;
-	-webkit-border-radius: 4px;
-	border-radius: 4px;
-	padding: .5em 1em;
-	margin: 0 .75em 0 0;
-	background-color: white;
-	color: black !important;
-	border: 1px solid #e5e5e5 !important;
-	cursor: pointer;
-}
-select {
-	clear: both;
-	display: block;
-	margin: .5em 0 1em 0;
-	vertical-align: middle;
-	padding: 0.5em 0.5em 0.5em 0;
-	height: 34px;
-}
-option {
-	padding: 0.25em 0.5em 0.5em;
-}
-div.checkbox {
-	clear: both;
-	padding: 1em 0;
-}
-.checkbox label {
-	display: inline;
-}
-div input[type="checkbox"] {
-	display:inline-block;
-}
-input[type=submit] {
-	margin: 1em inherit;
-	border: none;
-	color: #000;
-	font-size: 16px;
-	font-weight: bold;
-}
-input[type=text]:focus, input[type=password]:focus, textarea:focus, select:focus {
-	border-color: #00a8e6;
-	outline: none;
-}
 
 /*--- Misc ---*/
 hr {
@@ -592,19 +521,19 @@ ul#werknemers li {
 	cursor: move;
 	position: relative
 }
-ul#werknemers li .icon-remove-sign {
+ul#werknemers li .glyphicon-remove-sign {
 	position: absolute;
 	right: 5px;
 	top: 6px;
 	cursor: pointer
 }
-ul#werknemers li .icon-pencil {
+ul#werknemers li .glyphicon-pencil {
 	position: absolute;
 	right: 23px;
 	top: 6px;
 	cursor: pointer
 }
-ul#werknemers li .icon-info-sign {
+ul#werknemers li .glyphicon-info-sign {
 	position: absolute;
 	right: 43px;
 	top: 6px;
@@ -615,7 +544,7 @@ td .element {
 	margin: 4px;
 	cursor: move;
 }
-td .element .icon-remove-sign {
+td .element .glyphicon-remove-sign {
 	float:right;
 	right: 5px;
 	margin-top: 2px;
@@ -735,12 +664,10 @@ td div.element
 }
 
 #scrollbar1 {
-	width: 240px;
 	clear: both;
 	margin: 0px 0 10px;
 	padding: 3px 3px;
 	min-height: 600px;
-	box-shadow: 3px 2px rgba(0,0,0,0.1);
 	border-radius: 5px
 }
 #scrollbar1 .viewport {
@@ -817,4 +744,10 @@ ul#calamiteiten-lijst li {
 
 .lists ul li a:hover{
   text-decoration: none;
+}
+
+
+.special td {
+  font-weight: bold;
+  color: #555;
 }

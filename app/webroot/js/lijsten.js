@@ -62,9 +62,9 @@ $(function() {
 						$(this).next('td').append('<div class="element GSM_element">'+$(this).children('.element:last').children('.GSM').html()+'</div>');
 					}
 					$('.drag').attr('draggable', true);		
-					$('.element .icon-pencil').remove();	 
-					$('.element .icon-info-sign').remove();	
-					$('.element .icon-move').hide().remove();	
+					$('.element .glyphicon-pencil').remove();	 
+					$('.element .glyphicon-info-sign').remove();	
+					$('.element .glyphicon-move').hide().remove();	
 				}			
 			}
 		}, '.dropable'
@@ -85,7 +85,7 @@ $(function() {
 	$('.save_modal').click(function(e){
 		$(this).parents('.modal-footer').siblings('.modal-body').children('form').trigger('submit');
 	});	
-	$(document).on('click', 'li .icon-pencil', function(e){
+	$(document).on('click', 'li .glyphicon-pencil', function(e){
 		var naam = $(this).siblings('.naam').text();
 		var gsm = $(this).siblings('.GSM').text();
 		$('#personeel_bewerken').val(naam);
@@ -94,7 +94,19 @@ $(function() {
 		$('#GSM_old').val(gsm);
 		$('#myModal_personeel').modal('show');		
 	});
-	$(document).on('click', 'button.plus, li a.add_row', function(e){
+	$(document).on('change', '#UPMMaand', function(e){
+	  var lijstID = $('#lijstID').val();
+	  var option = $('#UPMMaand option:selected').val();
+	  var options = option.split('-');
+	  var url = window.location.href;
+	  var url_arr = url.split('/'+lijstID+'/');
+	  var new_url = url_arr[0]+'/'+lijstID+'/'+options[0]+'/'+options[1];
+	  window.location = new_url;
+	});
+	$(document).on('click', '#toggleHidden', function(e){
+	  $('tr.hiddenPersoneel').toggle();
+	});
+	$(document).on('click', '.btn.plus, li a.add_row', function(e){
 		$("#tussendatum").datepicker("destroy");
 		var id = $(this).parents('tr').attr('id');	
 		var $row = $(this);	
@@ -112,12 +124,10 @@ $(function() {
 		$('#week_add_form').children('#week').val(id);
 		begin_datum_array[0] = parseInt(begin_datum_array[0])+1;
 		eind_datum_array[0] = parseInt(eind_datum_array[0])-1;
-		if (!Modernizr.inputtypes['date']) {
-			$('#tussendatum').datepicker({ dateFormat: 'dd/mm/yy', firstDay: 1, constrainInput: true, minDate: (new Date(begin_datum_array[2]+','+begin_datum_array[1]+','+begin_datum_array[0])), maxDate: new Date(eind_datum_array[2]+','+eind_datum_array[1]+','+eind_datum_array[0]) });
-		}
-		$('#myModal_add_row').modal('show');
+		$('#tussendatum').datepicker({ dateFormat: 'dd/mm/yy', firstDay: 1, constrainInput: true, minDate: (new Date(begin_datum_array[2]+','+begin_datum_array[1]+','+begin_datum_array[0])), maxDate: new Date(eind_datum_array[2]+','+eind_datum_array[1]+','+eind_datum_array[0]) });
+		$('#myModal_add_row').modal('show');		
 	});
-	$(document).on('click', 'li .icon-remove-sign', function(e){
+	$(document).on('click', 'li .glyphicon-remove-sign', function(e){
 		var $clicked = e.target;
 		var gsm = $(this).siblings('.GSM').text();
 		var naam = $(this).siblings('.naam').text();
@@ -135,7 +145,7 @@ $(function() {
 	$(document).on('keydown', '#tussendatum', function(event){
 		event.preventDefault();
 	});	
-	$(document).on('click', 'td div .icon-remove-sign', function(e){
+	$(document).on('click', 'td div .glyphicon-remove-sign', function(e){
 		var gsm = $(this).siblings('.GSM').text();
 		var row_id = $(this).parents('tr').attr('id');
 		var url = window.location.href;
@@ -179,7 +189,7 @@ $(function() {
 			$(this).remove();		
 		});		
 	});
-	$('.icon-info-sign').tooltip();	
+	$('[data-toggle="tooltip"]').tooltip();	
 	$(document).on('submit', '#personeel_toevoegen, #wn_form', function(e){
 		e.preventDefault();
 		var url = window.location.href;
@@ -200,7 +210,7 @@ $(function() {
 			} else {
 				var test = $('<li class="drag well" draggable="true"><span class="icon-move"></span>&nbsp;<span class="naam">'+wn+'</span><span class="icon-remove-sign"></span><span class="icon-pencil"></span></li>').appendTo('#werknemers').hide().fadeIn('slow');
 			}
-			$('.icon-info-sign').tooltip();
+			$('.glyphicon-info-sign').tooltip();
 			$('#personeel').val('').focus();
 			$('#GSM').val('');
 			$('#scrollbar1').tinyscrollbar_update('bottom');
@@ -267,7 +277,12 @@ $(function() {
 		$.getJSON(hrefl, function(json){
 			$.each(json.feestdagen.data, function(name, date){
 				$('input[name="'+name+'"]').val(date);
-				$('#message').html('<span style="color:red; border: 1px solid red; padding: 2px 5px">'+json.message+'</span>');
+				if(json.message !== ''){
+				  
+				  $('#message').html('<span class="alert alert-danger" style="margin-bottom: 25px">'+json.message+'</span>').css('display', 'inherit');
+				} else {
+				  $('#message').css('display', 'none').html('');
+				}
 			});
 		});
 	});
@@ -336,7 +351,7 @@ $(function() {
 				$(this).text(naam);
 				$(this).parent('li').addClass('highlight2');
 				$(this).siblings('.GSM').text(gsmnummer);
-				$(this).siblings('.icon-info-sign').data('original-title', gsmnummer);
+				$(this).siblings('.glyphicon-info-sign').data('original-title', gsmnummer);
 			}
 		});
 	}, function(event) {
@@ -385,7 +400,7 @@ function editPersoneel()
 				$(this).text(naam);
 				$(this).parents('li').addClass('highlight');
 				$(this).siblings('.GSM').text(gsmnummer);
-				$(this).siblings('.icon-info-sign').data('original-title', gsmnummer);
+				$(this).siblings('.glyphicon-info-sign').data('original-title', gsmnummer);
 			}
 		});			
 	},"json");

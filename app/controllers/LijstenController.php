@@ -6,6 +6,7 @@ use lithium\security\Auth;
 use app\models\Lijsten;
 use app\models\Feestdagen;
 use app\models\Locations;
+use app\models\File;
 
 class lijstenController extends \lithium\action\Controller {
 	static $actief;
@@ -247,7 +248,7 @@ class lijstenController extends \lithium\action\Controller {
 		if (($subtype == "leidinggevenden") || ($subtype == "provinciaal")){
 			$data = Lijsten::Update(array('$addToSet' => array('permanentie.week_'.$week[1].'.'.$week[2].'.personeelslid' => array('naam' => $this->request->data['naam'], 'GSM' => $this->request->data['GSM']))), array('_id' => $this->request->id));	
 		} else if ($type == "calamiteiten" && $subtype == "medewerkers") {
-			$data = Lijsten::Update(array('$addToSet' => array('permanentie.week_'.$week[1].'.'.$week[2].'.'.$this->request->data['personeelstype'] => array('naam' => $this->request->data['naam']))), array('_id' => $this->request->id));	
+			$data = Lijsten::Update(array('$addToSet' => array('permanentie.week_'.$week[1].'.'.$week[2].'.medewerker' => array('naam' => $this->request->data['naam']))), array('_id' => $this->request->id));	
 		} else if ($type == "winterdienst" && $subtype == "medewerkers") {
 			$data = Lijsten::Update(array('$addToSet' => array('permanentie.week_'.$week[1].'.'.$week[2].'.'.$this->request->data['personeelstype'] => array('naam' => $this->request->data['naam']))), array('_id' => $this->request->id));			
 		}
@@ -475,14 +476,16 @@ class lijstenController extends \lithium\action\Controller {
 		} else {
 			$feestdagen['data']["Nieuwjaar"] = date('Y-m-d', strtotime($year.'-01-01'));
 			$feestdagen['data']["Paasmaandag"] = date('Y-m-d',strtotime($year.'-04-01'));
-			$feestdagen['data']["Feest_van_de_arbeid"] = date('Y-m-d',strtotime($year.'-04-01'));
+			$feestdagen['data']["Feest_van_de_arbeid"] = date('Y-m-d',strtotime($year.'-05-01'));
 			$feestdagen['data']["olhh"] = date('Y-m-d',strtotime($year.'-05-01'));
 			$feestdagen['data']["Pinkstermaandag"] = date('Y-m-d',strtotime($year.'-05-15'));
 			$feestdagen['data']["Feest_van_de_vlaamse_gemeenschap"] = date('Y-m-d',strtotime($year.'-07-11'));
 			$feestdagen['data']["nationale_feestdag"] = date('Y-m-d',strtotime($year.'-07-21'));
-			$feestdagen['data']["olvh"] = date('Y-m-d',strtotime($year.'-06-15'));
+			$feestdagen['data']["olvh"] = date('Y-m-d',strtotime($year.'-08-15'));
 			$feestdagen['data']["Allerheiligen"] = date('Y-m-d',strtotime($year.'-11-01'));
 			$feestdagen['data']["Allerzielen"] = date('Y-m-d',strtotime($year.'-11-02'));
+            $feestdagen['data']["Wapenstilstand"] = date('Y-m-d',strtotime($year.'-11-11'));
+            $feestdagen['data']["Koningsdag"] = date('Y-m-d',strtotime($year.'-11-15'));
 			$feestdagen['data']["Kerstdag"] = date('Y-m-d',strtotime($year.'-12-25'));
 			$feestdagen['data']["Kerstverlof1"] = date('Y-m-d',strtotime($year.'-12-26'));
 			$feestdagen['data']["Kerstverlof2"] = date('Y-m-d',strtotime($year.'-12-27'));
@@ -504,14 +507,16 @@ class lijstenController extends \lithium\action\Controller {
 		if ($this->request->data){
 			$this->request->data['data']["Nieuwjaar"] = new \MongoDate( strtotime($this->request->data['Jaar'].'-01-01'));
 			$this->request->data['data']["Paasmaandag"] = new \MongoDate(strtotime($this->request->data['Paasmaandag']));
-			$this->request->data['data']["Feest_van_de_arbeid"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-04-01'));
+			$this->request->data['data']["Feest_van_de_arbeid"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-05-01'));
 			$this->request->data['data']["olhh"] = new \MongoDate(strtotime($this->request->data['olhh']));
 			$this->request->data['data']["Pinkstermaandag"] = new \MongoDate(strtotime($this->request->data['Pinkstermaandag']));
 			$this->request->data['data']["Feest_van_de_vlaamse_gemeenschap"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-07-11'));
 			$this->request->data['data']["nationale_feestdag"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-07-21'));
-			$this->request->data['data']["olvh"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-06-15'));
+			$this->request->data['data']["olvh"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-08-15'));
 			$this->request->data['data']["Allerheiligen"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-11-01'));
 			$this->request->data['data']["Allerzielen"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-11-02'));
+            $this->request->data['data']["Wapenstilstand"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-11-11'));
+            $this->request->data['data']["Koningsdag"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-11-15'));
 			$this->request->data['data']["Kerstdag"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-12-25'));
 			$this->request->data['data']["Kerstverlof1"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-12-26'));
 			$this->request->data['data']["Kerstverlof2"] = new \MongoDate(strtotime($this->request->data['Jaar'].'-12-27'));
@@ -535,6 +540,7 @@ class lijstenController extends \lithium\action\Controller {
 			$feestdagen = Feestdagen::find('first', array('conditions' => array('Jaar' => $year)));
 			if(!is_object($feestdagen)){
 				$feestdagen = Feestdagen::create();
+                $message = htmlentities('<span class="alert alert-danger" style="margin-bottom: 15px">De feestdagen van '.$year.' zijn nog niet ingevoerd.</span>');
 			}
 		}
 		$actief = self::$actief;
@@ -542,12 +548,209 @@ class lijstenController extends \lithium\action\Controller {
 		$breadcrumb[] = array('naam' => 'Feestdagen bekijken');
 		return compact('login', 'actief', 'breadcrumb', 'feestdagen', 'message');
 	}
+
+    public function urenPerMaand($lijstID, $maand, $year){
+        $login = Auth::check('member');
+        $lijsten = Lijsten::find('first', array('conditions' => array('_id' => $lijstID)));
+        $lijsten_arr = $lijsten->data();
+        $feestdagen = Feestdagen::find('first', array('conditions' => array('Jaar' => $year)));
+        $actief = self::$actief;
+        $breadcrumb = self::$breadcrumb;
+        $locatie = Locations::find('first', array('conditions' => array('district' => $lijsten->district)));
+        $breadcrumb[] = array('naam' => 'Feestdagen bekijken');
+        return compact('login', 'actief', 'breadcrumb', 'lijsten', 'locatie', 'lijsten_arr', 'feestdagen', 'year', 'maand');
+    }
+    
+    public function exportUrenPerMaand($lijstID, $maand, $year, $type){
+        $lijsten = Lijsten::find('first', array('conditions' => array('_id' => $lijstID)));
+        $lijsten_arr = $lijsten->data();
+        $feestdagen = Feestdagen::find('first', array('conditions' => array('Jaar' => $year)));
+        $last_day = date('t', strtotime($year.'-'.$maand.'-1'));
+        setlocale(LC_ALL, 'nld_NLD');
+        
+        $personeelsleden = array();
+        foreach ($lijsten->personeel as $key => $value){
+            $personeelsleden[$value['naam']] = (int) 0;
+        }
+        $maanden_lijst = array();
+        $first_month = (int) date('n', $lijsten->Startdatum->sec);
+        $first_year = (int) date('Y', $lijsten->Startdatum->sec);
+        $date_loop = $lijsten->Startdatum->sec;
+        $maanden_lijst[$first_month.'-'.$first_year] = date('F Y', strtotime('01-'.$first_month.'-'.$first_year));
+        while ($date_loop<$lijsten->Einddatum->sec){
+            $first_month++;
+            $date_loop = strtotime('01-'.$first_month.'-'.$first_year);
+            $maanden_lijst[$first_month.'-'.$first_year] = strftime('%B %Y', strtotime('01-'.$first_month.'-'.$first_year));
+            if ($first_month==12){
+                $first_year++;
+                $first_month = 0;
+            }        
+        }
+        $tr = array();
+        
+        $feestdagen_vol = array(
+            "Nieuwjaar"=> "Nieuwjaar",
+            "Paasmaandag"=> "Paasmaandag",
+            "Feest_van_de_arbeid"=> "Feest van de arbeid",
+            "olhh"=> "Hemelvaart",
+            "Pinkstermaandag"=> "Pinkstermaandag",
+            "Feest_van_de_vlaamse_gemeenschap"=> "Feest van de vlaamse gemeenschap",
+            "nationale_feestdag"=> "Nationale feestdag",
+            "olvh"=> "Onze lieve vrouw hemelvaart",
+            "Allerheiligen"=> "Allerheiligen",
+            "Allerzielen"=> "Allerzielen",
+            "Wapenstilstand"=> "Wapenstilstand",
+            "Koningsdag"=> "Koningsdag",
+            "Kerstdag"=> "Kerstdag",
+            "Kerstverlof1"=> "Kerstverlof",
+            "Kerstverlof2"=> "Kerstverlof",
+            "Kerstverlof3"=> "Kerstverlof",
+            "Kerstverlof4"=> "Kerstverlof",
+            "Kerstverlof5"=> "Kerstverlof",
+            "Kerstverlof6"=> "Kerstverlof"
+        );
+        for($i=1;$i < $last_day;$i++) {
+            $tr[$i] = array(
+                'feestdag' => '',
+                'naam' => '',
+                'speciaal' => false,
+                'speciaal_class' => '',
+                'uren' => (int) 16,
+                'datetime' => strtotime($year.'-'.$maand.'-'.$i)
+            );
+            
+            $day = strftime('%A', $tr[$i]['datetime']);
+            if ($day == 'zaterdag' || $day == 'zondag'){
+                $tr[$i]['feestdag'] = $day;
+                $tr[$i]['speciaal'] = true;
+            }
+            foreach($feestdagen['data'] as $key => $value) {
+                if (date('Y-m-d', $tr[$i]['datetime']) === date('Y-m-d', $value->sec)){
+                    $tr[$i]['feestdag'] = $feestdagen_vol[$key];
+                    $tr[$i]['speciaal'] = true;
+                }
+            } 
+            $week = intval(date('W', $tr[$i]['datetime']));
+            if(array_key_exists('week_'.$week, $lijsten_arr['permanentie'])){
+                foreach($lijsten_arr['permanentie']['week_'.$week] as $key => $value){
+                    if(is_object($lijsten_arr['permanentie']['week_'.$week][$key]['startdatum'])){
+                        $startdatum = $lijsten_arr['permanentie']['week_'.$week][$key]['startdatum']->sec;
+                    } else {
+                        $startdatum = $lijsten_arr['permanentie']['week_'.$week][$key]['startdatum'];
+                    }
+                    if(is_object($lijsten_arr['permanentie']['week_'.$week][$key]['einddatum'])){
+                        $einddatum = $lijsten_arr['permanentie']['week_'.$week][$key]['einddatum']->sec;
+                    } else {
+                        $einddatum = $lijsten_arr['permanentie']['week_'.$week][$key]['einddatum'];
+                    }
+                    if ($tr[$i]['datetime'] >= $startdatum && $tr[$i]['datetime'] <= $einddatum){
+                        if ($lijsten->subtype == "leidinggevenden" || $lijsten->subtype == "provinciaal" || $lijsten->subtype == "EM"){
+                            if (array_key_exists('personeelslid', $lijsten_arr['permanentie']['week_'.$week][$key])){
+                                $tr[$i]['naam'] = $lijsten_arr['permanentie']['week_'.$week][$key]['personeelslid'][0]['naam'];
+                            }
+                        } else if ($lijsten->type == "calamiteiten") {
+                            if (array_key_exists('medewerker', $lijsten_arr['permanentie']['week_'.$week][$key])){
+                                $tr[$i]['naam'] = $lijsten_arr['permanentie']['week_'.$week][$key]['medewerker'][0]['naam'];
+                            }
+                        }
+                    }                        
+                }
+            }
+            if ($tr[$i]['speciaal']) {
+                $tr[$i]['uren'] = (int) 24;
+                $tr[$i]['speciaal_class'] = 'special';
+            }
+            if($tr[$i]['naam']!=''){
+                $personeelsleden[$tr[$i]['naam']] = $personeelsleden[$tr[$i]['naam']] + $tr[$i]['uren'];            
+            } else {
+                $tr[$i]['uren'] = '';
+            }
+        }
+        
+        if($type == 'totalen'){
+            $filename = "D:/xampp/htdocs/files/permanentielijst_totalen_".$lijsten->district.'_'.$maand.'_'.$year.'_'.date('d_m_Y__H_i_s').'.csv';
+            $fp = fopen($filename, 'w' ) or die("Can't open php://output");
+            header("Content-Type:application/csv"); 
+            header("Content-Disposition:attachment;filename=permanentielijst_totalen_".$lijsten->district.'_'.$maand.'_'.$year.'_'.date('d_m_Y__H_i_s').'.csv'); 
+            if ($lijsten->type == "calamiteiten" && $lijsten->subtype == "leidinggevenden"){
+                if (strstr($lijsten->district, 'Alle districten') !== FALSE){
+                    fputcsv($fp, array('Totalen Beurtrol'.$lijsten->subtype.' '.$lijsten->type.' wachtdienst ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';');
+                    fputcsv($fp, array(strftime('%B %Y', $tr[$i]['datetime'])));
+                    fputcsv($fp, array(' '), ';');
+                } else {
+                    fputcsv($fp, array('Totalen Beurtrol'.$lijsten->subtype.' '.$lijsten->type.' wachtdienst - '.$locatie->district.' - '.$locatie->districtnummer.' ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';');
+                    fputcsv($fp, array(strftime('%B %Y', $tr[$i]['datetime'])));
+                    fputcsv($fp, array(' '), ';');
+                } 
+            } else if ($lijsten->subtype == 'provinciaal') {
+                fputcsv($fp, array('Totalen Beurtrol Provinciaal Coördinator '.str_replace('Alle districten', '', $lijsten->district).' ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';');
+                fputcsv($fp, array(strftime('%B %Y', $tr[$i]['datetime'])));
+                fputcsv($fp, array(' '), ';');
+            }    
+            fputcsv($fp, array('Namen', 'Uren', 'Premie'), ';');
+            $totaal_value = 0;
+            $totaal_geld = 0;
+            ksort($personeelsleden);
+            foreach($personeelsleden as $key => $value){
+                if($value==0){
+                    $className='hiddenPersoneel';
+                } else {
+                    $className='';
+                }
+                $geld = 0; 
+                $totaal_value += $value;
+                if ($value >= 21 && $value <=50){
+                    $geld = (string) 75;
+                    $totaal_geld += 75;
+                } else if ($value >= 51 && $value <=100){
+                    $geld = (string) 100;
+                    $totaal_geld += 100;
+                } else if ($value >= 101 && $value <=200){
+                    $geld = (string) 125;
+                    $totaal_geld += 125;
+                } else if ($value >= 201){
+                    $geld = (string) 140;
+                    $totaal_geld += 125;
+                }
+               fputcsv($fp, array($key, $value, $geld), ';');
+            }                  
+            fputcsv($fp, array('Totaal', $totaal_value, $totaal_geld), ';');
+            fclose($fp) or die("Can't close php://output"); ;
+            $this->redirect('http://10.36.8.89/files/permanentielijst_totalen_'.$lijsten->district.'_'.$maand.'_'.$year.'_'.date('d_m_Y__H_i_s').'.csv');
+        } else if ($type=='overzicht'){
+            $filename = "D:/xampp/htdocs/files/permanentielijst_overzicht_".$lijsten->district.'_'.$maand.'_'.$year.'_'.date('d_m_Y__H_i_s').'.csv';
+            $fp = fopen($filename, 'w' ) or die("Can't open php://output");
+            header("Content-Type:application/csv"); 
+            header("Content-Disposition:attachment;filename=permanentielijst_totalen_".$lijsten->district.'_'.$maand.'_'.$year.'_'.date('d_m_Y__H_i_s').'.csv');
+            if ($lijsten->type == "calamiteiten" && $lijsten->subtype == "leidinggevenden"){
+                if (strstr($lijsten->district, 'Alle districten') !== FALSE){
+                    fputcsv($fp, array('Overzicht Beurtrol'.$lijsten->subtype.' '.$lijsten->type.' wachtdienst ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';');
+                    fputcsv($fp, array(strftime('%B %Y', $tr[$i]['datetime'])));
+                    fputcsv($fp, array(' '), ';');
+                } else {
+                    fputcsv($fp, array('Overzicht Beurtrol'.$lijsten->subtype.' '.$lijsten->type.' wachtdienst - '.$locatie->district.' - '.$locatie->districtnummer.' ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';');
+                    fputcsv($fp, array(strftime('%B %Y', $tr[$i]['datetime'])));
+                    fputcsv($fp, array(' '), ';');
+                } 
+            } else if ($lijsten->subtype == 'provinciaal') {
+                fputcsv($fp, array('Beurtrol Provinciaal Coördinator '.str_replace('Alle districten', '', $lijsten->district).' ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';');
+                fputcsv($fp, array(strftime('%B %Y', $tr[$i]['datetime'])));
+                fputcsv($fp, array(' '), ';');
+            }     
+            fputcsv($fp, array('Datum', 'Speciaal', 'Naam', 'Uren'), ';');
+            for($i=1;$i < $last_day;$i++) { 
+                fputcsv($fp, array(strftime('%A %d %B %Y', $tr[$i]['datetime']), $tr[$i]['feestdag'], $tr[$i]['naam'], $tr[$i]['uren']), ';');
+            } 
+            fclose($fp) or die("Can't close php://output"); ;
+            $this->redirect('http://10.36.8.89/files/permanentielijst_overzicht_'.$lijsten->district.'_'.$maand.'_'.$year.'_'.date('d_m_Y__H_i_s').'.csv');
+        } 
+    }
 	
 	public function export($type, $id){
 		$lijsten = Lijsten::find('first', array('conditions' => array('_id' => $id)));
 		$lijsten_arr = $lijsten->data();
 		if ($type=="csv") {
-			$fp = fopen('/var/www/permanentielijsten/app/webroot/files/permanentielijst_'.$lijsten->type.'_'.$lijsten->subtype.'_'.$lijsten->districtscode.'.csv', 'w' );
+			$fp = fopen('D:/xampp/htdocs/files/permanentielijst_'.$lijsten->type.'_'.$lijsten->subtype.'_'.$lijsten->districtscode.'.csv', 'w' );
 			if ($lijsten->subtype == "leidinggevenden" || ($lijsten->subtype == "provinciaal")){
 				fputcsv($fp, array('Week', 'Van', 'Tot', 'Naam leidinggevende', 'GSM Nummer'), ';'); 
 			} else if ($lijsten->type == "calamiteiten") {
@@ -666,7 +869,7 @@ class lijstenController extends \lithium\action\Controller {
 				
 			}
 			fclose($fp);
-			$this->redirect('/app/webroot/files/permanentielijst_'.$lijsten->type.'_'.$lijsten->subtype.'_'.$lijsten->districtscode.'.csv');
+			$this->redirect('http://10.36.8.89/files/permanentielijst_'.$lijsten->type.'_'.$lijsten->subtype.'_'.$lijsten->districtscode.'.csv');
 		} else if ($type == "doc") {
 			$filename = 'permanentielijst_'.$lijsten->type.'_'.$lijsten->subtype.'_'.$lijsten->districtscode.'.doc';
 			$table = '<html><center><table><thead>';
