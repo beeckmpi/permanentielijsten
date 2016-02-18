@@ -672,21 +672,13 @@ class lijstenController extends \lithium\action\Controller {
             $fp = fopen($filename, 'w' ) or die("Can't open php://output");
             header("Content-Type:application/csv"); 
             header("Content-Disposition:attachment;filename=permanentielijst_totalen_".$lijsten->district.'_'.$maand.'_'.$year.'_'.date('d_m_Y__H_i_s').'.csv'); 
-            if ($lijsten->type == "calamiteiten" && $lijsten->subtype == "leidinggevenden"){
-                if (strstr($lijsten->district, 'Alle districten') !== FALSE){
-                    fputcsv($fp, array('Totalen Beurtrol'.$lijsten->subtype.' '.$lijsten->type.' wachtdienst ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';');
-                    fputcsv($fp, array(strftime('%B %Y', $tr[$i]['datetime'])));
-                    fputcsv($fp, array(' '), ';');
-                } else {
-                    fputcsv($fp, array('Totalen Beurtrol'.$lijsten->subtype.' '.$lijsten->type.' wachtdienst - '.$locatie->district.' - '.$locatie->districtnummer.' ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';');
-                    fputcsv($fp, array(strftime('%B %Y', $tr[$i]['datetime'])));
-                    fputcsv($fp, array(' '), ';');
-                } 
+            if ($lijsten->type == "calamiteiten" && $lijsten->subtype == "medewerkers"){
+                fputcsv($fp, array('Totalen Beurtrol'.$lijsten->subtype.' '.$lijsten->type.' wachtdienst - '.$lijsten->district.' ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';'); 
             } else if ($lijsten->subtype == 'provinciaal') {
                 fputcsv($fp, array('Totalen Beurtrol Provinciaal Coördinator '.str_replace('Alle districten', '', $lijsten->district).' ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';');
-                fputcsv($fp, array(strftime('%B %Y', $tr[$i]['datetime'])));
-                fputcsv($fp, array(' '), ';');
-            }    
+            }                
+            fputcsv($fp, array('De totalen van '.strftime('%B %Y', strtotime('01-'.$maand.'-'.$year))));
+            fputcsv($fp, array(' '), ';');
             fputcsv($fp, array('Namen', 'Uren', 'Premie'), ';');
             $totaal_value = 0;
             $totaal_geld = 0;
@@ -722,21 +714,13 @@ class lijstenController extends \lithium\action\Controller {
             $fp = fopen($filename, 'w' ) or die("Can't open php://output");
             header("Content-Type:application/csv"); 
             header("Content-Disposition:attachment;filename=permanentielijst_totalen_".$lijsten->district.'_'.$maand.'_'.$year.'_'.date('d_m_Y__H_i_s').'.csv');
-            if ($lijsten->type == "calamiteiten" && $lijsten->subtype == "leidinggevenden"){
-                if (strstr($lijsten->district, 'Alle districten') !== FALSE){
-                    fputcsv($fp, array('Overzicht Beurtrol'.$lijsten->subtype.' '.$lijsten->type.' wachtdienst ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';');
-                    fputcsv($fp, array(strftime('%B %Y', $tr[$i]['datetime'])));
-                    fputcsv($fp, array(' '), ';');
-                } else {
-                    fputcsv($fp, array('Overzicht Beurtrol'.$lijsten->subtype.' '.$lijsten->type.' wachtdienst - '.$locatie->district.' - '.$locatie->districtnummer.' ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';');
-                    fputcsv($fp, array(strftime('%B %Y', $tr[$i]['datetime'])));
-                    fputcsv($fp, array(' '), ';');
-                } 
+            if ($lijsten->type == "calamiteiten" && $lijsten->subtype == "medewerkers"){
+                fputcsv($fp, array('Totalen Beurtrol'.$lijsten->subtype.' '.$lijsten->type.' wachtdienst - '.$lijsten->district.' ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';');
             } else if ($lijsten->subtype == 'provinciaal') {
-                fputcsv($fp, array('Beurtrol Provinciaal Coördinator '.str_replace('Alle districten', '', $lijsten->district).' ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';');
-                fputcsv($fp, array(strftime('%B %Y', $tr[$i]['datetime'])));
-                fputcsv($fp, array(' '), ';');
-            }     
+                fputcsv($fp, array('Totalen Beurtrol Provinciaal Coördinator '.str_replace('Alle districten', '', $lijsten->district).' ('.date('Y',$lijsten->Startdatum->sec).'-'.date('Y',$lijsten->Einddatum->sec).')'), ';');
+            }                
+            fputcsv($fp, array('Overzicht van '.strftime('%B %Y', $tr[$i]['datetime'])));
+            fputcsv($fp, array(' '), ';');
             fputcsv($fp, array('Datum', 'Speciaal', 'Naam', 'Uren'), ';');
             for($i=1;$i < $last_day;$i++) { 
                 fputcsv($fp, array(strftime('%A %d %B %Y', $tr[$i]['datetime']), $tr[$i]['feestdag'], $tr[$i]['naam'], $tr[$i]['uren']), ';');

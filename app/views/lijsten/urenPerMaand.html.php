@@ -1,4 +1,4 @@
-<?php if (($login['rol'] == 'administrator') || ($login['location'] == $lijsten->district) || (strpos($login['location'], 'Alle districten') !== false && $login['provincie'] == $lijsten->provincie)){ 
+<?php if (($login['rol'] == 'administrator' || ($login['rol'] == 'personeel' && $login['provincie'] == $lijsten->provincie)) || (strpos($login['location'], 'Alle districten') !== false && $login['provincie'] == $lijsten->provincie)){ 
     $last_day = date('t', strtotime($year.'-'.$maand.'-1'));
     setlocale(LC_ALL, 'nld_NLD');
     $feestdagen_vol = array(
