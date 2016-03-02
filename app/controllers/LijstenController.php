@@ -7,6 +7,7 @@ use app\models\Lijsten;
 use app\models\Feestdagen;
 use app\models\Locations;
 use app\models\File;
+use app\models\Personeelsleden;
 
 class lijstenController extends \lithium\action\Controller {
 	static $actief;
@@ -559,6 +560,80 @@ class lijstenController extends \lithium\action\Controller {
         $locatie = Locations::find('first', array('conditions' => array('district' => $lijsten->district)));
         $breadcrumb[] = array('naam' => 'Feestdagen bekijken');
         return compact('login', 'actief', 'breadcrumb', 'lijsten', 'locatie', 'lijsten_arr', 'feestdagen', 'year', 'maand');
+    }
+    
+    public function personeelsleden($naam = '', $gsm = '', $provincie = '', $district = ''){
+        $login = Auth::check('member');
+        if(!$login){
+            return $this->redirect('/login');
+        }
+        $filter = array();
+        if ($naam !== ''){
+            $filter['naam'] = array('$regex' => new MongoRegex("/^$naam/"));
+        }
+        if($gsm !== ''){
+            $filter['gsm'] = array('$regex' => new MongoRegex("/^$gsm/"));;
+        }
+        if ($provincie !== ''){
+            $filter['provincie'] = $provincie;
+        }
+        if($district !== ''){
+            $filter['district'] = $district;
+        }
+        $personeelsleden_obj = Personeelsleden::find('all', array('conditions' => $filter, 'order' => array('naam' => 'ASC', 'district' => 'DESC')));
+        $personeelsleden = $personeelsleden_obj->data();
+        $locations = Locations::find('all', array('order' => array('district' => 'ASC')));  
+        $locaties= array('0' =>'--selecteer district--');
+        foreach ($locations as $key => $location){
+            $provincie = $locations[$key]['provincie'];
+            $districtnummer = $locations[$key]['districtnummer'];
+            $district = $locations[$key]['district'];
+            if($login['rol'] != 'administrator'){
+                if ($provincie == $login['location']){                                      
+                    $locaties[$districtnummer] = $district.' ('.$locations[$key]['provincie'].')';
+                }
+            } else {
+                $locaties[$districtnummer] =  $district.' ('.$locations[$key]['provincie'].')';
+            }
+        }
+        
+        $actief = self::$actief;
+        $breadcrumb = self::$breadcrumb;
+        $breadcrumb[] = array('naam' => 'Feestdagen bekijken');
+        return compact('login', 'actief', 'breadcrumb', 'locaties', 'personeelsleden', 'naam', 'gsm', 'provincie', 'district', 'filter');
+    }
+    
+    public function createPersoneelslijst(){
+        $login = Auth::check('member');
+        if(!$login){
+            return $this->redirect('/login');
+        }
+        $begin = date('Y-m-d H:i:s',mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+        $einde = date('Y-m-d H:i:s',mktime(0, 0, 0, date("m"), date("d"), date("Y")+1));             
+        $filter = array('Einddatum' => array('$gte' => $begin, '$lt' => $einde));                
+        $lijsten = Lijsten::find('all', array('conditions' => $filter));
+        $personeelsleden = array();
+        foreach ($lijsten as $key => $lijst){
+            foreach ($lijst['personeel'] as $key2 => $value){
+                $personeelslid = array(
+                    'naam' => $lijst['personeel'][$key2]['naam'],
+                    'GSM' => $lijst['personeel'][$key2]['GSM'],
+                    'provincie' => $lijst['provincie'],
+                    'district' => $lijst['district'],
+                    'districtcode' => $lijst['districtscode'],
+                    'vlimpersnummer' => ''
+                );
+                $personeelsleden[] = $personeelslid;
+                if(!array_intersect($personeelsleden, $personeelslid)){
+                    $personeelsleden_array = Personeelsleden::create($personeelslid);
+                    $personeelsleden_array->save();
+                }
+            }
+        }
+        $actief = self::$actief;
+        $breadcrumb = self::$breadcrumb;
+        $breadcrumb[] = array('naam' => 'Personeelsleden Aanmaken');
+        return compact('login', 'actief', 'breadcrumb', 'personeelsleden');
     }
     
     public function exportUrenPerMaand($lijstID, $maand, $year, $type){
