@@ -88,12 +88,123 @@ $(function() {
 	$(document).on('click', 'li .glyphicon-pencil', function(e){
 		var naam = $(this).siblings('.naam').text();
 		var gsm = $(this).siblings('.GSM').text();
+		var vlimpersnummer = $(this).siblings('.vlimpersnummer').text();
+		$('#vlimpersnummer_bewerken').val(vlimpersnummer);
+		$('#vlimpersnummer_old').val(vlimpersnummer);
 		$('#personeel_bewerken').val(naam);
 		$('#GSM_bewerken').val(gsm);
 		$('#personeel_old').val(naam);
 		$('#GSM_old').val(gsm);
 		$('#myModal_personeel').modal('show');		
 	});
+	$(document).on('click', '#addPersonen', function(event){
+	  $('#myModal_add_personeel').modal('show');
+	});
+	$(document).on('click', '.btn-group-label', function(event){
+    var active = $(this).hasClass('active');
+    if (active) {
+      $(this).removeClass('btn-info').addClass('btn-default');
+      $(this).children('input[type="checkbox"]').val('off').removeAttr('checked');
+    } else {
+      $(this).removeClass('btn-default').addClass('btn-info');         
+      $(this).children('input[type="checkbox"]').val('on').attr('checked','checked');
+    }
+  });
+  $(document).on('click', '.select-all', function(event){    
+    event.preventDefault();
+    $(this).parent().next().children('.btn-group-label').children('input[type="checkbox"]').val('on').attr('checked','checked');
+    $(this).parent().next().children('.btn-group-label').addClass('active').addClass('btn-info').removeClass('btn-default');
+  });
+  $(document).on('click', '.deselect-all', function(event){
+    event.preventDefault();
+    $(this).parent().next().children('.btn-group-label').children('input[type="checkbox"]').val('off').prop('checked', false).removeAttr('checked');
+    $(this).parent().next().children('.btn-group-label').removeClass('active').removeClass('btn-info').addClass('btn-default');
+  });
+  $(document).on('click', '.save_personeel_modal', function(event){
+    event.preventDefault();
+    var personeel = $('#personeel_buttons').serialize(); 
+    var url = window.location.href;
+    var url_arr = url.split('/lijsten/');
+    var id= $('#hidden_id').val();
+    var href = url_arr[0]+'/lijsten/personeel/list/'+id;
+    $.post(href, personeel, function(json){
+       $.each(json['personeelsleden'], function(index, value){
+         $('#werknemers').append(value);
+       });
+       $('#personeel_buttons_group label.active').remove();
+       $('[data-toggle="tooltip"]').tooltip();  
+    },'json');
+    $('#myModal_add_personeel').modal('hide');
+  });
+	$(document).on('click', '.bewerk_personeel', function(event){
+	  event.preventDefault();
+	  var href = $(this).attr('href');
+	  $.getJSON(href, function(json){
+	    var personeelslid = json.personeelslid_arr;
+	    $('#vlimpersnummer_bewerken, #vlimpersnummer_old').val(personeelslid.vlimpersnummer);
+	    $('#personeel_bewerken, #personeel_old').val(personeelslid.naam);
+	    $('#GSM_bewerken, #GSM_old').val(personeelslid.GSM);
+	    $('#hidden_id').val(personeelslid._id);
+	    $('#Districtscode option[value='+personeelslid.districtcode+']').attr('selected', 'selected');
+	  });
+	  $('#myModal_personeel_bewerken').modal('show');   
+	});
+	$(document).on('click', '.remove_personeel', function(event){
+    event.preventDefault();
+    var href = $(this).attr('href');
+    if (confirm('Bent u zeker dat u dit personeelslid uit de de databank wilt verwijderen?')){
+      $.getJSON(href, function(json){
+        $('#'+json.id).fadeOut();
+      });
+    } 
+  });
+	$(document).on('click', '.save_modal_personeel', function(event){
+	  var form = $('#wn_edit_form').serialize();
+	  var href = $('#wn_edit_form').attr('action');
+	  var id = $('#hidden_id').val();
+	  $.ajax({
+	    type: "POST",
+	    url: href+id, 
+	    data: form,
+	    dataType: 'json'}).done(function(json){
+	      var personeel = json.personeel_data;
+	      if(json.personeel){
+	         $('#myModal_personeel_bewerken').modal('hide');  
+	         $('#'+json.id+'_vlimpers').html(personeel.vlimpersnummer);
+	         $('#'+json.id+'_naam').html(personeel.naam);
+	         $('#'+json.id+'_GSM').html(personeel.GSM);
+	         $('#'+json.id+'_provincie').html(personeel.provincie);
+	         $('#'+json.id+'_district').html(personeel.district);
+	         $('#'+json.id).css('background-color', 'rgb(192, 239, 201)');
+	         setTimeout(function(){ $('#'+json.id).css('background-color', '#fff');; }, 5000);
+	         
+	      }
+	  });
+	});
+	$(document).on('keyup', '#naamFilter, #GSMFilter', function(e){
+	  getPersoneel();
+	});
+	$(document).on('change', '#selectDistrict', function(e){
+	  getPersoneel();
+	});
+	function getPersoneel(){
+	  var href = window.location.href;
+    var naam = $('#naamFilter').val();
+    if (naam === ''){
+      naam = 'empty';
+    }
+    var GSM = $('#GSMFilter').val();
+    if (GSM === ''){
+      GSM = 'empty';
+    }
+    var district = $('#selectDistrict option:selected').val();
+    if (district === '0' || district === undefined){
+      district = 'empty';
+    }
+    $.get(href+'/'+naam+'/'+GSM+'/'+district, function(html){
+      $('#personeelsleden_tabel tbody').html(html);
+    });
+	}
 	$(document).on('change', '#UPMMaand', function(e){
 	  var lijstID = $('#lijstID').val();
 	  var option = $('#UPMMaand option:selected').val();
@@ -133,12 +244,16 @@ $(function() {
 		var naam = $(this).siblings('.naam').text();
 		var url = window.location.href;
 		var url_arr = url.split('/lijsten/');
-		var href = url_arr[0]+'/lijsten/'+$('#deleteurl').text();
+		var deleteURL = $('#deleteurl').text();
+		var href = url_arr[0]+'/lijsten/'+ deleteURL;
+		var id = deleteURL.split('/');
+		var naam = $(this).prev('.naam').text();
 		$.post(href, {'naam': naam, 'GSM': gsm}, function(json){
 			$($clicked).parent().fadeOut('slow', function(){			
 				$($clicked).remove();		
 				$('#scrollbar1').tinyscrollbar_update('relative');	
 			});	
+			$('#personeel_buttons_group').append('<label class="btn btn-default btn-xs btn-group-label" style="margin: 0 6px 12px 0px"><input type="checkbox" autocomplete="off" id="'+json.persID+'" value="off" name="personeel['+json.persID+']" checked>'+naam+'</label>');
 		},'json');	
 			
 	});
@@ -195,20 +310,21 @@ $(function() {
 		var url = window.location.href;
 		var url_arr = url.split('/lijsten/');
 		var href = url_arr[0]+'/lijsten/'+$(this).attr('action');
+		var vn = $('#vlimpersnummer').val();
 		var wn = $('#personeel').val();
-		var pn = $('#GSM').val();
+		var pn = 'Vlimpersnummer: '+vn+' - GSM: '+ $('#GSM').val();
 		if(pn==undefined)
 		{
 			pn='';
 		}
-		$.post(href, {'naam': wn, 'GSM': pn}, function(json){
+		$.post(href, {'vlimpersnummer': vn, 'naam': wn, 'GSM': pn}, function(json){
 			
 		},'json');		
 		if (wn!= ''){
 			if(pn!=''){			
-				var test = $('<li class="drag well" draggable="true"><span class="icon-move"></span>&nbsp;<span class="naam">'+wn+'</span><span class="icon-remove-sign"></span><span class="icon-pencil"></span><a class="icon-info-sign" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="'+pn+'"></a><div class="hidden GSM">'+pn+'</div></li>').appendTo('#werknemers').hide().fadeIn('slow');
+				var test = $('<li class="drag well" draggable="true"><span class="glyphicon glyphicon-move"></span>&nbsp;<span class="naam">'+wn+'</span><span class="glyphicon glyphicon-remove-sign"></span><span class="glyphicon glyphicon-pencil"></span><a class="glyphicon glyphicon-info-sign" style="color: #333" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="'+pn+'"></a><div class="hidden GSM">'+pn+'</div></li>').appendTo('#werknemers').hide().fadeIn('slow');
 			} else {
-				var test = $('<li class="drag well" draggable="true"><span class="icon-move"></span>&nbsp;<span class="naam">'+wn+'</span><span class="icon-remove-sign"></span><span class="icon-pencil"></span></li>').appendTo('#werknemers').hide().fadeIn('slow');
+				var test = $('<li class="drag well" draggable="true"><span class="glyphicon glyphicon-move"></span>&nbsp;<span class="naam">'+wn+'</span><span class="glyphicon glyphicon-remove-sign"></span><span class="glyphicon glyphicon-pencil"></span></li>').appendTo('#werknemers').hide().fadeIn('slow');
 			}
 			$('.glyphicon-info-sign').tooltip();
 			$('#personeel').val('').focus();
@@ -294,7 +410,7 @@ $(function() {
 		var provincie = $('select[name="provincie"] option:selected').val();
 		var district = $('select[name="District"] option:selected').val();
 		$.getJSON(hrefl+'/index/'+jaar+'/'+provincie+'/'+district, function(json){
-			$('#calamiteiten-lijst').html('');
+			$('#calamiteiten-provinciaal-coordinator-lijst, #calamiteiten-districtmedewerkers-lijst').html('');
 			if (json.calamiteiten){
 				$.each(json.calamiteiten, function(index){
 					var startdatum = toDateYear(json.calamiteiten[index].Startdatum);
@@ -307,18 +423,23 @@ $(function() {
 					if( json.calamiteiten[index].districtscode == 'AD_ANT' || (json.calamiteiten[index].district.indexOf('Alle districten') !== -1)){	
 						if (json.calamiteiten[index].subtype == 'leidinggevenden'){	
 							var link = '<a href="'+hrefl+'view/calamiteiten/'+json.calamiteiten[index].subtype+'/'+json.calamiteiten[index].districtscode+'/'+startdatum+'">Beurtrol leidinggevenden calamiteiten wachtdienst ('+json.calamiteiten[index].provincie+') ('+startdatum+'-'+einddatum+')</a>';
+							$('#calamiteiten-provinciaal-coordinator-lijst').append('<li>'+link+'</li>');
 						} else if (json.calamiteiten[index].subtype == 'EM'){
 							var link = '<a href="'+hrefl+'view/calamiteiten/'+json.calamiteiten[index].subtype+'/'+json.calamiteiten[index].districtscode+'/'+startdatum+'">Beurtrol Permanentie Sectie EM ('+json.calamiteiten[index].provincie+') ('+startdatum+'-'+einddatum+')</a>';
+							$('#calamiteiten-provinciaal-coordinator-lijst').append('<li>'+link+'</li>');
 						}
 					} else {	
 						var link = '<a href="'+hrefl+'view/calamiteiten/'+json.calamiteiten[index].subtype+'/'+json.calamiteiten[index].districtscode+'/'+startdatum+'">Beurtrol '+subtype+' '+json.calamiteiten[index].districtscode+' '+json.calamiteiten[index].district+' ('+startdatum+'-'+einddatum+')</a>';
+						$('#calamiteiten-districtmedewerkers-lijst').append('<li>'+link+'</li>');
 					}
-					$('#calamiteiten-lijst').append('<li>'+link+'</li>');
+					
 				});
 			}
 			$('#winterdienst-lijst').html('');
 			if (json.winterdienst){
+			  $('#winterdienst-provinciaal-coordinator-lijst, #winterdienst-leidinggevenden-lijst, #winterdienst-districtmedewerkers-lijst').html('');
 				$.each(json.winterdienst, function(index){
+				  
 					var startdatum = toDateYear(json.winterdienst[index].Startdatum);
 					var einddatum = toDateYear(json.winterdienst[index].Einddatum);
 					if(json.winterdienst[index].subtype == 'medewerkers') {
@@ -327,12 +448,19 @@ $(function() {
 						var subtype = json.winterdienst[index].subtype;
 					}
 					if( json.winterdienst[index].subtype == 'provinciaal' || json.winterdienst[index].district == 'Alle districten'){
-						var link = '<a href="'+hrefl+'view/winterdienst/'+json.winterdienst[index].subtype+'/'+json.winterdienst[index].districtscode+'/'+startdatum+'">Beurtrol Provinciaal Coördinator ('+json.winterdienst[index].provincie+') ('+startdatum+'-'+einddatum+')</a>';	
+						var link = '<a href="'+hrefl+'view/winterdienst/'+json.winterdienst[index].subtype+'/'+json.winterdienst[index].districtscode+'/'+startdatum+'">Beurtrol Provinciaal Coördinator ('+json.winterdienst[index].provincie+') ('+startdatum+'-'+einddatum+')</a>';
+						$('#winterdienst-provinciaal-coordinator-lijst').append('<li>'+link+'</li>');	
 					} else {
-						var link = '<a href="'+hrefl+'view/winterdienst/'+json.winterdienst[index].subtype+'/'+json.winterdienst[index].districtscode+'/'+startdatum+'">Beurtrol '+subtype+' '+json.winterdienst[index].districtscode+' '+json.winterdienst[index].district+' ('+startdatum+'-'+einddatum+')</a>';
+					  if (json.winterdienst[index].subtype == 'leidinggevenden'){
+						  var link = '<a href="'+hrefl+'view/winterdienst/'+json.winterdienst[index].subtype+'/'+json.winterdienst[index].districtscode+'/'+startdatum+'">Beurtrol '+subtype+' '+json.winterdienst[index].districtscode+' '+json.winterdienst[index].district+' ('+startdatum+'-'+einddatum+')</a>';
+						  $('#winterdienst-leidinggevenden-lijst').append('<li>'+link+'</li>');
+						} else if (json.winterdienst[index].subtype == 'medewerkers'){
+              var link = '<a href="'+hrefl+'view/winterdienst/'+json.winterdienst[index].subtype+'/'+json.winterdienst[index].districtscode+'/'+startdatum+'">Beurtrol '+subtype+' '+json.winterdienst[index].districtscode+' '+json.winterdienst[index].district+' ('+startdatum+'-'+einddatum+')</a>';
+              $('#winterdienst-districtmedewerkers-lijst').append('<li>'+link+'</li>');
+            }
 						
 					}					
-					$('#winterdienst-lijst').append('<li>'+link+'</li>');
+					
 				});
 			}
 		});
@@ -376,6 +504,7 @@ function editPersoneel()
 	var href = url_arr[0]+'/lijsten/'+$('#wn_edit_form').attr('action');
 	
 	var data = $("#wn_edit_form").serialize();
+	var vlimpersnummer = $("#wn_edit_form input[name='vlimpersnummer']").val();
 	var naam = $("#wn_edit_form input[name='naam']").val();
 	var old_naam = $("#wn_edit_form input[name='old_naam']").val();
 	var gsmnummer = $("#wn_edit_form input[name='gsmnummer']").val();

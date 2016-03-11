@@ -1,0 +1,1 @@
+ <?php echo $this->_view->render(array('element' => 'personeel_table'), compact('personeelsleden')) ?>

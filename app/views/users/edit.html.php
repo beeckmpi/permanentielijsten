@@ -1,7 +1,10 @@
+<div class="container-fluid" style="width: 970px; margin: 0 auto;">
+    <div class="row">
+        <div class="col-md-12">
 <h2>Gebruiker Bewerken</h2>
     <div class="row">
     <?=$this->form->create($user); ?>
-    	<div class="col-md-4">
+    	<div class="col-md-6">
     		<?=$this->form->field('username_reference', array('type' => 'hidden', 'value' => $user->username));?>
     		<div class="form-group">
     	    	<div style="position:relative">
@@ -22,7 +25,7 @@
     	        <?=$this->form->field('location', array('label' => 'Locatie', 'class' => 'form-control', 'required' => true, 'list' => $locaties, 'type' => 'select', 'selected' => $user->location));?>
 	        </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="form-group">
         	   <?=$this->form->field('voornaam', array('label' => 'Voornaam', 'class' => 'form-control', 'required' => 'true', 'placeholder' => 'Voornaam', 'size' => 50, 'value' => $user->voornaam)); ?>
         	</div>
@@ -47,4 +50,4 @@
         </div>
         
     <?=$this->form->end(); ?>
-    </div>
+    </div></div></div></div>

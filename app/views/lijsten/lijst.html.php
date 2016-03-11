@@ -27,6 +27,9 @@
                 <h4>Permanentielijst - <?=$locatie->district?> - <?=$locatie->districtnummer?> - <?=$lijsten->subtype?> <?=$lijsten->type?> (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
             <?php } ?>   
 	    	</div>
+	    	<div class="col-md-3">
+	    	    <button class="btn btn-warning btn-sm" id="addPersonen">Toevoegen uit personenlijst</button>
+	    	</div>
 	    </div>	
 	    <div class="row">
 	    	
@@ -108,8 +111,8 @@
 									echo '<td class="van"><div class="element">'.date('d/m/Y', $lijsten_arr['permanentie']['week_'.$i][$key]['startdatum']).'</div></td>';
 									echo '<td class="tot"><div class="element">'.date('d/m/Y',$lijsten_arr['permanentie']['week_'.$i][$key]['einddatum']).'</div></td>';
 									if ($lijsten->subtype == "leidinggevenden" || $lijsten->subtype == "provinciaal" || $lijsten->subtype == "EM"){
-										if (array_key_exists('personeelslid', $lijsten_arr['permanentie']['week_'.$i][$key])){
-											$list_data = array('naam' => '', 'GSM' => '');
+									    $list_data = array('naam' => '', 'GSM' => '');
+										if (array_key_exists('personeelslid', $lijsten_arr['permanentie']['week_'.$i][$key])){											
 											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['personeelslid'] as $number){			
 												if(isset($number['naam'])){
 													$list_data['naam'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="glyphicon glyphicon-remove-sign"></span><div class="hidden GSM">'.$number['GSM'].'</div></div>';
@@ -121,10 +124,10 @@
 											echo '<td class="leidingevende dropable"></td><td class="leidingevende GSM"></td><td>'.$button.'</td></tr>';
 										}																	
 									} else if ($lijsten->type == "calamiteiten") {
-										if (array_key_exists('medewerker', $lijsten_arr['permanentie']['week_'.$i][$key])){
-											$list_data = array('medewerker' => '', 'GSM' => '');
+									    $list_data = array('medewerker' => '', 'GSM' => '');
+										if (array_key_exists('medewerker', $lijsten_arr['permanentie']['week_'.$i][$key])){											
 											foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['medewerker'] as $number){
-												if(isset($number['naam'])){
+												if(isset($number['naam']) && isset($personeel[$number['naam']])){
 													$list_data['medewerker'] .=  '<div class="element drag"><span class="naam">'.$number['naam'].'</span><span class="glyphicon glyphicon-remove-sign"></span><div class="hidden GSM">'.$personeel[$number['naam']].'</div></div>';
 													$list_data['GSM'] .= '<div class="element GSM_element">'.$personeel[$number['naam']].'</div>';												
 												} 												
@@ -181,19 +184,30 @@
 	    			<div class="scrollbar"><div class="track"><div class="thumb"><div class="end"></div></div></div></div>
 					<div class="viewport">
 						<div class="overview">
+						    
 				    		<ul id="werknemers">	 
-				    			<?php foreach($personeel_lijst as $key){?>
-				    				<?php if($key['GSM'] != ''){?>
-				    					<li class="drag well" draggable="true"><span class="glyphicon glyphicon-move" style="margin-right: 5px"></span><span class="naam"><?=$key['naam']?></span><span class="glyphicon glyphicon-remove-sign"></span><span class="glyphicon glyphicon-pencil"></span><a class="icon-info-sign" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="<?=$key['GSM']?>"></a><div class="hidden GSM"><?=$key['GSM']?></div></li>
-				    				<?php } else {?>
-				    					<li class="drag well" draggable="true"><span class="glyphicon glyphicon-move" style="margin-right: 5px"></span><span class="naam"><?=$key['naam']?></span><span class="glyphicon glyphicon-remove-sign"></span><span class="glyphicon glyphicon-pencil"></span></li>
-				    			<?php }} ?>							
+				    			<?php foreach($personeel_lijst as $key){
+				    			    $info = '';
+				    			    if(array_key_exists('vlimpersnummer', $key)){
+				    			        $vlimpersnummer = '<div class="hidden vlimpersnummer">'.$key["vlimpersnummer"].'</div>';
+				    			        if ($key['vlimpersnummer']!= ''){
+                                            $info = 'Vlimpers: '.$key['vlimpersnummer'];
+                                        }
+				    			    } else {
+				    			        $vlimpersnummer = '<div class="hidden vlimpersnummer"></div>';
+				    			    }
+				    				($info=='') ? $info = 'GSM: '.$key['GSM'] : $info .= ' - GSM: '.$key['GSM'];
+				    				?>
+				    				<li class="drag well" draggable="true"><span class="glyphicon glyphicon-move" style="margin-right: 5px"></span><span class="naam"><?=$key['naam']?></span><span class="glyphicon glyphicon-remove-sign"></span><span class="glyphicon glyphicon-pencil"></span><a class="glyphicon glyphicon-info-sign" data-placement="bottom" style="color: #333" data-toggle="tooltip" title="" data-original-title="<?=$info?>"></a><div class="hidden GSM"><?=$key['GSM']?></div><?php echo $vlimpersnummer?></li>
+				    			<?php } ?>							
 							</ul>	
 							<div class="hidden" id="deleteurl">remove_personeelslid/<?=$lijsten->_id?></div>
 							<div id="wn_toevoegen" style="margin-top: 10px;">
+							    
 								<form id="wn_form" action="add_personeelslid/<?=$lijsten->_id?>" style="margin-bottom:0px;">
-									<input type="text"  class="form-control" id="personeel" placeholder="Naam toevoegen" required="true" name="naam" val="" style="margin: 3px 0">
-									<input type="text" class="form-control" id="GSM" placeholder="GSM nummer toevoegen" required="true" name="gsmnummer" val="" style="margin: 3px 0">
+								    <input type="text"  class="form-control" id="vlimpersnummer" placeholder="Vlimpersnummer" required="true" name="vlimpersnummer" value="" style="margin: 3px 0">
+									<input type="text"  class="form-control" id="personeel" placeholder="Naam" required="true" name="naam" value="" style="margin: 3px 0">
+									<input type="text" class="form-control" id="GSM" placeholder="GSM" required="true" name="gsmnummer" value="" style="margin: 3px 0">
 									<input type="submit" value="toevoegen" id="personeel_toevoegen" class="btn btn-default">
 								</form>
 							</div>
@@ -213,12 +227,15 @@
         		    <div class="modal-body">
         		    	<p>
         		    	<form id="wn_edit_form" action="edit_permanentie/<?=$lijsten->_id?>">
+        		    	    <label for="naam">Vlimpersnummer</label>
+                            <input type="text" id="vlimpersnummer_bewerken"  class="form-control" placeholder="Vlimpersnummer"required="true" name="vlimpersnummer" val=""><br />
+                            <input type="hidden" id="vlimpersnummer_old" name="old_vlimpers" val="">
         		    		<label for="naam">Naam</label>
-        					<input type="text" id="personeel_bewerken"  class="form-control" placeholder="Naam toevoegen"required="true" name="naam" val=""><br />
-        					<input type="hidden" id="personeel_old" placeholder="Naam toevoegen" name="old_naam" val="">
+        					<input type="text" id="personeel_bewerken"  class="form-control" placeholder="Naam"required="true" name="naam" val=""><br />
+        					<input type="hidden" id="personeel_old" name="old_naam" val="">
         					<label for="gsmnummer">GSM</label>
-        					<input type="text" id="GSM_bewerken"  class="form-control" placeholder="GSM nummer toevoegen" required="true" name="gsmnummer" val="">
-        					<input type="hidden" id="GSM_old" placeholder="GSM nummer toevoegen" name="old_gsmnummer" val="">
+        					<input type="text" id="GSM_bewerken"  class="form-control" placeholder="GSM" required="true" name="gsmnummer" val="">
+        					<input type="hidden" id="GSM_old"name="old_gsmnummer" val="">
         				</form>
         				</p>
         		    </div>
@@ -254,6 +271,43 @@
         		</div>
             </div>
 		</div>	
+		<div id="myModal_add_personeel" class="modal fade" tabindex="-2" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h3>Personen toevoegen</h3>
+                    </div>
+                    <div class="modal-body">
+                        <input id="hidden_id" type="hidden" value="<?=$lijsten->_id?>">
+                        <form id="personeel_buttons" action="personeel/list/<?=$lijsten->_id?>">                            
+                            <div style="margin-bottom: 18px">
+                                <button class="btn btn-default btn-xs select-all">Selecteer iedereen</button> <button class="btn btn-default btn-xs deselect-all">Selectie ongedaan maken</button>
+                            </div>
+                            <div class="" data-toggle="buttons" id="personeel_buttons_group">
+                           <?php foreach ($personeelsleden as $key => $personeel) {
+                               $show = true;
+                               foreach ($personeel_lijst as $key2){
+                                    if ($key2['naam']===$personeel['naam']) {
+                                        $show =false;
+                                    }
+                               }
+                               if ($show){
+                           ?>
+                              <label class="btn btn-default btn-xs btn-group-label" style="margin: 0 6px 12px 0px">
+                                <input type="checkbox" autocomplete="off" id="<?=$personeel['_id']?>" value="off" name="personeel[<?=$personeel['_id']?>]" checked> <?=$personeel['naam']?>
+                              </label>
+                           <?php }} ?>
+                           </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Sluiten</button>
+                        <button type="button" class="btn btn-info save_personeel_modal">Toevoegen</button>
+                    </div>
+                </div>
+            </div>
+        </div>  
 		</div>
 	<?php } else { ?>
 		<h4>Deze pagina is niet toegangelijk!</h4>

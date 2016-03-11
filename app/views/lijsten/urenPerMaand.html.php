@@ -23,8 +23,10 @@
         "Kerstverlof6"=> "Kerstverlof"
     );
     $personeelsleden = array();
+    $vlimpersnummer = array();
     foreach ($lijsten->personeel as $key => $value){
         $personeelsleden[$value['naam']] = (int) 0;
+        $vlimpersnummer[$value['naam']] = $value['vlimpersnummer'];
     }
     $maanden_lijst = array();
     $first_month = (int) date('n', $lijsten->Startdatum->sec);
@@ -104,17 +106,6 @@
     <div class="row">
         <div class="col-md-12">
             <input type=hidden id=lijstID value=<?=$lijsten->_id?> />
-            <select id=UPMMaand>
-                <?php foreach ($maanden_lijst as $key => $value) { 
-                    $data = explode('-', $key);
-                    $selected = '';
-                    if ($data[0]==$maand && $data[1]==$year){
-                        $selected = 'selected=selected';
-                    }
-                    ?>
-                    <option value="<?=$key?>" <?=$selected?>><?=$value?></option>
-                <?php } ?> 
-            </select>
             <?php if ($lijsten->type == "calamiteiten" && $lijsten->subtype == "leidinggevenden"){?>   
                <?php if (strstr($lijsten->district, 'Alle districten') !== FALSE){?>
                  <h4>Beurtrol <?=$lijsten->subtype?> <?=$lijsten->type?> wachtdienst (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
@@ -128,6 +119,20 @@
             <?php } else { ?>
                 <h4>Permanentielijst - <?=$locatie->district?> - <?=$locatie->districtnummer?> - <?=$lijsten->subtype?> <?=$lijsten->type?> (<?=date('Y',$lijsten->Startdatum->sec)?>-<?=date('Y',$lijsten->Einddatum->sec)?>)</h4>
             <?php } ?>
+            <div style="margin: 0px 0 10px 0; padding-bottom: 15px">
+                <label for="UPMMaand">Maand:</label>
+                <select id=UPMMaand name="UPMMaand" class="form-control" style="max-width:375px;">
+                    <?php foreach ($maanden_lijst as $key => $value) { 
+                        $data = explode('-', $key);
+                        $selected = '';
+                        if ($data[0]==$maand && $data[1]==$year){
+                            $selected = 'selected=selected';
+                        }
+                        ?>
+                        <option value="<?=$key?>" <?=$selected?>><?=$value?></option>
+                    <?php } ?> 
+                </select>
+            </div>
             <div style="width:40%">
             <?php echo $this->html->link('CSV', 'lijsten/exportUrenPerMaand/'.$lijsten->_id.'/'.$maand.'/'.$year.'/totalen', array('escape' => false, 'class' => 'btn btn-info btn-xs', 'style'=>'float:right; margin-top:-5px; margin-left: 5px"'));?>
             <a id=toggleHidden class="btn btn-default btn-xs" style='float:right; margin-top:-5px'>Toon/Verberg 0 uren</a>            
@@ -136,6 +141,7 @@
             <table class="table table-striped" id="Personeelstabel" style="width: 40%;">
                 <thead>
                     <tr>
+                        <th>Vlimpers</th>
                         <th>Naam</th>
                         <th>uren</th>
                         <th>Premie</th>
@@ -170,13 +176,14 @@
                             }
                         ?>
                         <tr class=<?=$className?>>
+                            <td><?=$vlimpersnummer[$key]?></td>
                             <td><?=$key?></td>
                             <td><?=$value?>u</td>
                             <td><?=$geld?></td>
                         </tr>
                     <?php } ?>
                     <tr>
-                        <td><b>Totalen</b></td>
+                        <td colspan="2"><b>Totalen</b></td>
                         <td><b><?=$totaal_value?>u</b></td>
                         <td><b><?=$totaal_geld?>€</b></td>
                     </tr>

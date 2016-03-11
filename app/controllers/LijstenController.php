@@ -134,7 +134,7 @@ class lijstenController extends \lithium\action\Controller {
 			$this->request->data["personeel"] = array();
 			$this->request->data["permanentie"] = array();
 			foreach ($checkboxes as $checkbox) {
-				$locatie = Locations::find('first', array('conditions' => array('districtnummer' => $checkbox)));	
+				$locatie = Locations::find('first', array('conditions' => array('districtnummer' => $checkbox), 'sort' => array('provincie' => 'ASC')));	
 				$this->request->data['district'] = $locatie->district;
 				$this->request->data['districtscode'] = $locatie->districtnummer;	
 				$this->request->data['provincie'] = $locatie->provincie;			
@@ -145,7 +145,7 @@ class lijstenController extends \lithium\action\Controller {
 			}
 		}
 		$lijsten = Lijsten::create();
-		$locations = Locations::find('all', array('order' => array('district' => 'ASC')));
+		$locations = Locations::find('all', array('order' => array('provincie' => 'ASC', 'district' => 'ASC')));
 		$actief = self::$actief;		
 		foreach ($locations as $key => $location){
 			$provincie = $locations[$key]['provincie'];
@@ -171,18 +171,19 @@ class lijstenController extends \lithium\action\Controller {
 		$lijsten_arr = $lijsten->data();
 		$personeel_lijst = array();
 		foreach ($lijsten->personeel as $personeelslid){
-			$personeel_lijst[] = array('naam' => $personeelslid->naam, 'GSM' => $personeelslid->GSM);
+			$personeel_lijst[] = array('naam' => $personeelslid->naam, 'GSM' => $personeelslid->GSM, 'vlimpersnummer' => $personeelslid->vlimpersnummer);
 		}
 		usort($personeel_lijst, function($a, $b)
 		{
 		     return strcmp($a["naam"], $b["naam"]);
 		});
+        $personeelsleden = Personeelsleden::find('all', array('conditions' => array('provincie' => $lijsten->provincie, 'districtcode' => $lijsten->districtscode), 'order' => array('naam' => 'ASC')));
 		$locatie = Locations::find('first', array('conditions' => array('district' => $lijsten->district)));
 		$actief = self::$actief;
 		$breadcrumb = self::$breadcrumb;
 		$breadcrumb[] = array('naam' => 'Lijsten bekijken');
 		$url = $this->request->env('base');
-		return compact('login', 'lijsten', 'lijsten_arr', 'personeel_lijst', 'locatie', 'actief', 'breadcrumb', 'url');
+		return compact('login', 'lijsten', 'lijsten_arr', 'personeel_lijst', 'locatie', 'actief', 'breadcrumb', 'url', 'personeelsleden');
 	}
 
 	public function view($type, $subtype, $districtscode, $startjaar)
@@ -223,7 +224,21 @@ class lijstenController extends \lithium\action\Controller {
 			return $this->redirect('/login');
 		}		
 		$id = $this->request->id;
-		$data = Lijsten::Update(array('$addToSet' => array('personeel' => array('naam' => $this->request->data['naam'], 'GSM' => $this->request->data['GSM']))), array('_id' => $this->request->id));	
+		$data = Lijsten::Update(array('$addToSet' => array('personeel' => array('vlimpersnummer' => $this->request->data['vlimpersnummer'], 'naam' => $this->request->data['naam'], 'GSM' => $this->request->data['GSM']))), array('_id' => $this->request->id));
+        $lijst = Lijsten::find('first', array('conditions' => array('_id' => $this->request->id)));
+        $personeelslid = array(
+            'naam' => $this->request->data['naam'],
+            'GSM' => $this->request->data['GSM'],
+            'provincie' => $lijst->provincie,
+            'district' => $lijst->district,
+            'districtcode' => $lijst->districtscode,
+            'vlimpersnummer' => $this->request->data['vlimpersnummer']
+        );
+        $personeelsleden[] = $personeelslid;
+        if(!array_intersect($personeelsleden, $personeelslid)){
+           $personeelsleden_array = Personeelsleden::create($personeelslid);
+           $personeelsleden_array->save();
+        }        	
 		return compact('login', 'data','id');		 			
 	}
 
@@ -234,8 +249,11 @@ class lijstenController extends \lithium\action\Controller {
 			return $this->redirect('/login');
 		}		
 		$id = $this->request->id;
-		$data = Lijsten::Update(array('$pull' => array('personeel' => array('naam' => $this->request->data['naam'], 'GSM' => $this->request->data['GSM']))), array('_id' => $this->request->id));	
-		return compact('login', 'data','id');		 			
+		$data = Lijsten::Update(array('$pull' => array('personeel' => array('naam' => $this->request->data['naam'], 'GSM' => $this->request->data['GSM']))), array('_id' => $this->request->id));
+        $personeelslid = Personeelsleden::find('first', array('conditions' => array('naam' => $this->request->data['naam'], 'GSM' => $this->request->data['GSM'])));
+        $personeelslid_arr = $personeelslid->data();
+        $persID= $personeelslid_arr['_id'];
+		return compact('login', 'data','persID');		 			
 	}
 	
 	public function add_permanentie(){
@@ -266,6 +284,7 @@ class lijstenController extends \lithium\action\Controller {
 		foreach ($lijst['personeel'] as $key => $value){
 			if($lijst['personeel'][$key]['naam'] == $this->request->data['old_naam']){
 				$lijst['personeel'][$key]['naam'] = $this->request->data['naam'];
+                $lijst['personeel'][$key]['vlimpersnummer'] = $this->request->data['vlimpersnummer'];
 			}
 			if(array_key_exists('GSM', $lijst['personeel'][$key])){
 				if($lijst['personeel'][$key]['naam'] == $this->request->data['old_naam'] && $lijst['personeel'][$key]['GSM'] == $this->request->data['old_gsmnummer']){
@@ -562,23 +581,123 @@ class lijstenController extends \lithium\action\Controller {
         return compact('login', 'actief', 'breadcrumb', 'lijsten', 'locatie', 'lijsten_arr', 'feestdagen', 'year', 'maand');
     }
     
-    public function personeelsleden($naam = '', $gsm = '', $provincie = '', $district = ''){
+    public function personeel($type, $id){
+        $login = Auth::check('member');
+        $actief = self::$actief;
+        $breadcrumb = self::$breadcrumb;
+        $breadcrumb[] = array('naam' => 'Personeel');
+        if ($type==='list'){
+            $data = $this->request->data;
+            $personeelsleden = array();
+            foreach($data['personeel'] as $key => $value){
+                if($value=='on'){
+                    $info = '';
+                    $personeelslid = Personeelsleden::find('first', array('conditions' => array('_id' => $key)));
+                    $personeelslid_arr = $personeelslid->data();
+                    $data = Lijsten::Update(array('$addToSet' => array('personeel' => array('vlimpersnummer' => $personeelslid->vlimpersnummer, 'naam' => $personeelslid->naam, 'GSM' => $personeelslid->GSM))), array('_id' => $id));
+                    if ($personeelslid->vlimpersnummer!= ''){
+                        $info = 'Vlimpers: '.$personeelslid->vlimpersnummer;
+                    }
+                    ($info=='') ? $info = 'GSM: '.$personeelslid->GSM : $info .= ' - GSM: '.$personeelslid->GSM;
+                    $personeelsleden[$key] = '<li class="drag well" draggable="true"><span class="glyphicon glyphicon-move" style="margin-right: 5px"></span><span class="naam">'.$personeelslid->naam.'</span><span class="glyphicon glyphicon-remove-sign"></span><span class="glyphicon glyphicon-pencil"></span><a class="glyphicon glyphicon-info-sign" data-placement="bottom" style="color: #333" data-toggle="tooltip" title="" data-original-title="'.$info.'"></a><div class="hidden GSM">'.$personeelslid->GSM.'</div><div class="hidden vlimpersnummer">'.$personeelslid->vlimpersnummer.'</div></li>';
+                }
+            }            
+            return compact('login', 'actief', 'breadcrumb', 'personeelsleden');
+        } else if ($type==='edit'){
+            $personeelslid = Personeelsleden::find('first', array('conditions' => array('_id' => $id)));
+            $personeelslid_arr = $personeelslid->data();
+            return compact('login', 'actief', 'breadcrumb', 'personeelslid_arr');
+        } else if ($type==='remove'){
+            $personeelslid = Personeelsleden::remove(array('_id' => $id));
+            return compact('login', 'actief', 'breadcrumb', 'personeelslid', 'id');
+        }else if ($type==="save"){
+            $data = $this->request->data;
+            if (($login['rol'] == 'administrator') || ($login['rol'] == 'personeel')){
+                $locatie = Locations::find('first', array('conditions' => array('districtnummer' => $data['districtscode'])));
+            }else {
+                $locatie = Locations::find('first', array('conditions' => array('district' => $login['location'])));
+            }
+            $data['provincie'] = $locatie->provincie;
+            $data['district'] = $locatie->district;
+            $data['districtcode'] = $data['districtscode'];
+            unset($data['vlimpersnummer_old'], $data['personeel_old'], $data['GSM_old']);
+            $personeel = Personeelsleden::update($data, array('_id' => $id));
+            $personeel_data = Personeelsleden::find('first', array('conditions' => array('_id' => $id)));
+            $begin = date('Y-m-d H:i:s',mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+            $einde = date('Y-m-d H:i:s',mktime(0, 0, 0, date("m"), date("d"), date("Y")+1));                                     
+            $filter = array('Einddatum' => array('$gte' => $begin, '$lt' => $einde), 'provincie' => $personeel_data->provincie);
+            $lijsten = Lijsten::find('all', array('conditions' => $filter));
+            $lijsten_arr = $lijsten->data();
+            foreach($lijsten_arr as $key => $lijst){
+                $change = false;
+                foreach ($lijst['personeel'] as $key => $value){
+                    $gsm = preg_replace('/\D+/', '', $lijst['personeel'][$key]['GSM']);
+                    $gsm_old = preg_replace('/\D+/', '', $this->request->data['GSM_old']);
+                    if($lijst['personeel'][$key]['naam'] === $this->request->data['personeel_old'] && $gsm === $gsm_old){
+                        $lijst['personeel'][$key]['naam'] = $this->request->data['naam'];
+                        $lijst['personeel'][$key]['vlimpersnummer'] = $this->request->data['vlimpersnummer'];
+                        $lijst['personeel'][$key]['GSM'] = $this->request->data['GSM'];
+                        $change = true;
+                    }          
+                }
+                if ($change){
+                    $personeelstypes = array('personeelslid', 'arbeider', 'medewerker', 'wegentoezichters-vroeg', 'wegentoezichters-laat', 'arbeiders-vroeg', 'arbeiders-laat');
+                    foreach ($lijst['permanentie'] as $week => $week_value){
+                        foreach ($lijst['permanentie'][$week] as $week_key => $week_key_value){
+                            foreach ($personeelstypes as $type){
+                                if(array_key_exists($type, $lijst['permanentie'][$week][$week_key])){
+                                    foreach ($lijst['permanentie'][$week][$week_key][$type] as $personeel_key => $item){
+                                        if (array_key_exists('GSM', $this->request->data)){
+                                            if(array_key_exists('GSM', $lijst['permanentie'][$week][$week_key][$type][$personeel_key])){
+                                                 $gsm = preg_replace('/\D+/', '', $lijst['personeel'][$key]['GSM']);
+                                                if($gsm === $gsm_old && $lijst['permanentie'][$week][$week_key][$type][$personeel_key]['naam'] == $this->request->data['personeel_old']){
+                                                    $lijst['permanentie'][$week][$week_key][$type][$personeel_key]['GSM'] = $this->request->data['GSM'];
+                                                }
+                                            }
+                                        } else if(array_key_exists('naam', $lijst['permanentie'][$week][$week_key][$type][$personeel_key])){
+                                           
+                                            if($lijst['permanentie'][$week][$week_key][$type][$personeel_key]['naam'] == $this->request->data['personeel_old']){
+                                                $lijst['permanentie'][$week][$week_key][$type][$personeel_key]['naam'] = $this->request->data['naam'];
+                                            }
+                                        }                                    
+                                    }                       
+                                }   
+                            }                               
+                        }           
+                    }
+                    $lijsten->save($lijst);
+                }
+            }
+            return compact('personeel', 'id', 'personeel_data', 'lijsten_arr', 'personeel_data');
+        } else {           
+            return compact('login', 'actief', 'breadcrumb');
+        }
+    }
+    
+    public function personeelsleden($naam = '', $gsm = '', $district = ''){
         $login = Auth::check('member');
         if(!$login){
             return $this->redirect('/login');
         }
+        $ajax = false;
         $filter = array();
-        if ($naam !== ''){
-            $filter['naam'] = array('$regex' => new MongoRegex("/^$naam/"));
+        if ($naam !== ''&&$naam!='empty'){
+            $filter['naam'] = array('$regex' => new \MongoRegex("/^$naam/i"));
+            $ajax = true;
         }
-        if($gsm !== ''){
-            $filter['gsm'] = array('$regex' => new MongoRegex("/^$gsm/"));;
+        if($gsm !== '' && $gsm!='empty'){
+            $filter['GSM'] = array('$regex' => new \MongoRegex("/^$gsm/i"));
+            $ajax = true;
         }
-        if ($provincie !== ''){
-            $filter['provincie'] = $provincie;
+         if($district !== '' && $district!='empty'){
+             $filter['districtcode'] = $district;
+            $ajax = true;
         }
-        if($district !== ''){
-            $filter['district'] = $district;
+        if (($login['rol'] !== 'administrator') && ($login['rol'] !== 'personeel')){
+            $filter['district'] = $login['location'];
+        }
+        if($gsm=='empty' || $naam =='empty'){
+            $ajax = true;
         }
         $personeelsleden_obj = Personeelsleden::find('all', array('conditions' => $filter, 'order' => array('naam' => 'ASC', 'district' => 'DESC')));
         $personeelsleden = $personeelsleden_obj->data();
@@ -588,21 +707,18 @@ class lijstenController extends \lithium\action\Controller {
             $provincie = $locations[$key]['provincie'];
             $districtnummer = $locations[$key]['districtnummer'];
             $district = $locations[$key]['district'];
-            if($login['rol'] != 'administrator'){
-                if ($provincie == $login['location']){                                      
-                    $locaties[$districtnummer] = $district.' ('.$locations[$key]['provincie'].')';
-                }
-            } else {
-                $locaties[$districtnummer] =  $district.' ('.$locations[$key]['provincie'].')';
-            }
+            $locaties[$districtnummer] =  $district.' ('.$locations[$key]['provincie'].')';
         }
-        
-        $actief = self::$actief;
+        $actief = array('personeel' => 'active');
         $breadcrumb = self::$breadcrumb;
-        $breadcrumb[] = array('naam' => 'Feestdagen bekijken');
-        return compact('login', 'actief', 'breadcrumb', 'locaties', 'personeelsleden', 'naam', 'gsm', 'provincie', 'district', 'filter');
+        $breadcrumb[] = array('naam' => 'Feestdagen bekijken');   
+        if ($ajax) {
+            $this->_render['layout'] = 'ajax';
+            $table =  $this->render(array('data' => compact('login', 'actief', 'breadcrumb', 'personeelsleden'), 'head' => false, 'template' => 'personeel_table')); 
+        }                    
+        return compact('login', 'actief', 'breadcrumb', 'locaties', 'personeelsleden', 'table');
     }
-    
+
     public function createPersoneelslijst(){
         $login = Auth::check('member');
         if(!$login){
@@ -611,11 +727,13 @@ class lijstenController extends \lithium\action\Controller {
         $begin = date('Y-m-d H:i:s',mktime(0, 0, 0, date("m"), date("d"), date("Y")));
         $einde = date('Y-m-d H:i:s',mktime(0, 0, 0, date("m"), date("d"), date("Y")+1));             
         $filter = array('Einddatum' => array('$gte' => $begin, '$lt' => $einde));                
-        $lijsten = Lijsten::find('all', array('conditions' => $filter));
-        $personeelsleden = array();
+        $lijsten = Lijsten::find('all', array('conditions' => $filter, 'order' => array('naam' => 'ASC')));
+        $personeelsleden = array(); 
+        $personeelsleden_clean = array();        
         foreach ($lijsten as $key => $lijst){
-            foreach ($lijst['personeel'] as $key2 => $value){
-                $personeelslid = array(
+            $personeelslid_clean = array();
+            foreach ($lijst['personeel'] as $key2 => $value){                
+                $personeelslid = $personeelslid_clean = array(
                     'naam' => $lijst['personeel'][$key2]['naam'],
                     'GSM' => $lijst['personeel'][$key2]['GSM'],
                     'provincie' => $lijst['provincie'],
@@ -623,8 +741,17 @@ class lijstenController extends \lithium\action\Controller {
                     'districtcode' => $lijst['districtscode'],
                     'vlimpersnummer' => ''
                 );
-                $personeelsleden[] = $personeelslid;
-                if(!array_intersect($personeelsleden, $personeelslid)){
+                $personeelslid_clean['GSM'] = preg_replace('/\D+/', '', $lijst['personeel'][$key2]['GSM']);
+                $personeelslid_clean['naam'] = strtolower($lijst['personeel'][$key2]['naam']);
+                $exists = false;
+                foreach ($personeelsleden_clean as $key => $value){
+                    if(($personeelsleden_clean[$key]['naam']===$personeelslid_clean['naam']) && ($personeelsleden_clean[$key]['GSM']===$personeelslid_clean['GSM'])){
+                        $exists = true;
+                    }
+                }
+                if(!$exists){
+                    $personeelsleden_clean[] = $personeelslid_clean;
+                    $personeelsleden[] = $personeelslid;
                     $personeelsleden_array = Personeelsleden::create($personeelslid);
                     $personeelsleden_array->save();
                 }
@@ -633,7 +760,7 @@ class lijstenController extends \lithium\action\Controller {
         $actief = self::$actief;
         $breadcrumb = self::$breadcrumb;
         $breadcrumb[] = array('naam' => 'Personeelsleden Aanmaken');
-        return compact('login', 'actief', 'breadcrumb', 'personeelsleden');
+        return compact('login', 'actief', 'breadcrumb', 'personeelsleden_clean');
     }
     
     public function exportUrenPerMaand($lijstID, $maand, $year, $type){
@@ -644,8 +771,10 @@ class lijstenController extends \lithium\action\Controller {
         setlocale(LC_ALL, 'nld_NLD');
         
         $personeelsleden = array();
+        $vlimpersnummer = array();
         foreach ($lijsten->personeel as $key => $value){
             $personeelsleden[$value['naam']] = (int) 0;
+            $vlimpersnummer[$value['naam']] = $value['vlimpersnummer'];
         }
         $maanden_lijst = array();
         $first_month = (int) date('n', $lijsten->Startdatum->sec);
@@ -754,7 +883,7 @@ class lijstenController extends \lithium\action\Controller {
             }                
             fputcsv($fp, array('De totalen van '.strftime('%B %Y', strtotime('01-'.$maand.'-'.$year))));
             fputcsv($fp, array(' '), ';');
-            fputcsv($fp, array('Namen', 'Uren', 'Premie'), ';');
+            fputcsv($fp, array('Vlimpers', 'Namen', 'Uren', 'Premie'), ';');
             $totaal_value = 0;
             $totaal_geld = 0;
             ksort($personeelsleden);
@@ -779,9 +908,9 @@ class lijstenController extends \lithium\action\Controller {
                     $geld = (string) 140;
                     $totaal_geld += 125;
                 }
-               fputcsv($fp, array($key, $value, $geld), ';');
+               fputcsv($fp, array($vlimpersnummer[$key], $key, $value, $geld), ';');
             }                  
-            fputcsv($fp, array('Totaal', $totaal_value, $totaal_geld), ';');
+            fputcsv($fp, array('Totaal', '', $totaal_value, $totaal_geld), ';');
             fclose($fp) or die("Can't close php://output"); ;
             $this->redirect('http://10.36.8.89/files/permanentielijst_totalen_'.$lijsten->district.'_'.$maand.'_'.$year.'_'.date('d_m_Y__H_i_s').'.csv');
         } else if ($type=='overzicht'){

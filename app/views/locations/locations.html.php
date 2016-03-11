@@ -4,8 +4,9 @@
    
 	<?php $locaties = array(
 			        		'' 		=> '--Selecteer--', 
-			        		'AWVA' 	=> 'Antwerpen', 
+			        		'WA' 	=> 'Antwerpen', 
 			        		'AWVB' 	=> 'Brussel', 
+			        		'EMT'  =>  'EMT',
 			        		'AWVL' 	=> 'Limburg', 
 			        		'AWVOV' => 'Oost-Vlaanderen', 
 			        		'PCO' 	=> 'PCO', 

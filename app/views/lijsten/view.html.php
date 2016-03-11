@@ -130,7 +130,7 @@
 										if (array_key_exists('medewerker', $lijsten_arr['permanentie']['week_'.$i][$key])){
 											$list_data = array('naam' => '', 'GSM' => '');
                                             foreach ($lijsten_arr['permanentie']['week_'.$i][$key]['medewerker'] as $number){            
-                                                if(isset($number['naam'])){
+                                                if(isset($number['naam']) && isset($personeel[$number['naam']])){
                                                     $list_data['naam'] .=  '<div><span class="naam">'.$number['naam'].'</span><div class="hidden GSM">'.$personeel[$number['naam']].'</div></div>';
                                                     $list_data['GSM'] .= '<div>'.$personeel[$number['naam']].'</div>';
                                                 }                                           

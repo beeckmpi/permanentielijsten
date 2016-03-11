@@ -1,1 +1,1 @@
-<?=print_r($personeelsleden)?>
+<?=print_r($personeelsleden_clean)?>

@@ -45,14 +45,19 @@
     					<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
     						<li><?=$this->html->link('Gebruikers lijst', 'users')?></li>
     						<li><?=$this->html->link('Gebruikers toevoegen', 'users/add')?></li>
-    						<li><?=$this->html->link('Gebruikers toegangsrechten', 'users/roles')?></li>
+    						<!--<li><?=$this->html->link('Gebruikers toegangsrechten', 'users/roles')?></li>-->
     						<li role="presentation" class="divider"></li>
     						<li><?=$this->html->link('Lijst toevoegen', 'lijsten/add')?></li>
-    						<li><?=$this->html->link('Lijsten Beheren', 'lijsten/beheren')?></li>
+    						<!--<li><?=$this->html->link('Lijsten Beheren', 'lijsten/beheren')?></li>-->
     						<li role="presentation" class="divider"></li>
     						<li><?=$this->html->link('Feestdagen beheren', 'lijsten/feestdagen')?></li>
+    						<li role="presentation" class="divider"></li>
+                            
     					</ul>
     				</li>    				
+    				<?php } ?>
+    				<?php if (($login['rol'] == 'administrator') || ($login['rol'] == 'personeel') || ($login['rol'] == 'gebruiker') || (strpos($login['location'], 'Alle districten') !== false && $login['provincie'] == $lijsten->provincie)){?>
+    				<li  class="<?php echo $actief['personeel']?>"><?=$this->html->link('Personeel', 'lijsten/personeelsleden')?></li>
     				<?php } ?>
     			</ul>
     			<ul class="nav navbar-nav navbar-right">
@@ -60,8 +65,8 @@
                         if(array_key_exists('voornaam', $login)){   
                     ?>              
                     <div class="btn-group" style="margin-top: 8px">
-                        <button class="btn btn-info"><?=$login['voornaam'].' '.$login['achternaam'];?></button>
                         <button class="btn dropdown-toggle btn-info"  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <?=$login['voornaam'].' '.$login['achternaam'];?>
                             <span class="caret"></span>
                         </button>
                     <?php } else { ?>
