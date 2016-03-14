@@ -40,24 +40,23 @@
             	</div>
             <div class="row lists" style="margin-top:20px">
             	<div class="col-md-6">
-            			<div class="nav-header" style="font-size:larger; margin-bottom: 9px; margin-left: 13px">Calamiteiten</div>
-            							
-            				<?php foreach($calamiteiten as  $lijst) {?>
-            				    <?php if ($lijst->subtype == "medewerkers") {
-            				        $medewerkers[] = $lijst;
-            				    } else if ($lijst->subtype == "leidinggevenden") {
-            				        $leidinggevenden[] = $lijst;
-            				    }} ?>
-            			<ul id="calamiteiten-provinciaal-coordinator-lijst">
-            				<?php foreach ($leidinggevenden as $key => $value){ ?>
-            				    <lI class="provinciaal_coordinator"><?=$this->html->link('Beurtrol Provinciaal Coördinator Permanentie '.str_replace('Alle districten ', '', $value->district).' ('.date('Y', $value->Startdatum->sec).'-'.date('Y', $value->Einddatum->sec).')', 'lijsten/view/'.$value->type.'/'.$value->subtype.'/'.$value->districtscode.'/'.date('Y', $value->Startdatum->sec))?></lI>
-            				<?php } ?>
-            		  </ul>
-            		  <ul id="calamiteiten-districtmedewerkers-lijst">
-            				<?php foreach ($medewerkers as $key => $value){?>
-            					<lI><?=$this->html->link('Beurtrol Districtsmedewerkers '.$value->districtscode.' '.$value->district.' ('.date('Y', $value->Startdatum->sec).'-'.date('Y', $value->Einddatum->sec).')', 'lijsten/view/'.$value->type.'/'.$value->subtype.'/'.$value->districtscode.'/'.date('Y', $value->Startdatum->sec))?></lI>
-            				<?php }?>               
-            			</ul>
+            		<div class="nav-header" style="font-size:larger; margin-bottom: 9px; margin-left: 13px">Calamiteiten</div>
+            	       	<?php foreach($calamiteiten as  $lijst) {?>
+            			    <?php if ($lijst->subtype == "medewerkers") {
+            			        $medewerkers[] = $lijst;
+            			    } else if ($lijst->subtype == "leidinggevenden") {
+            			        $leidinggevenden[] = $lijst;
+            			    }} ?>
+            		<ul id="calamiteiten-provinciaal-coordinator-lijst">
+            			<?php foreach ($leidinggevenden as $key => $value){ ?>
+            			    <lI class="provinciaal_coordinator"><?=$this->html->link('Beurtrol Provinciaal Coördinator Permanentie '.str_replace('Alle districten ', '', $value->district).' ('.date('Y', $value->Startdatum->sec).'-'.date('Y', $value->Einddatum->sec).')', 'lijsten/view/'.$value->type.'/'.$value->subtype.'/'.$value->districtscode.'/'.date('Y', $value->Startdatum->sec))?></lI>
+            			<?php } ?>
+            		</ul>
+            		<ul id="calamiteiten-districtmedewerkers-lijst">
+            			<?php foreach ($medewerkers as $key => $value){?>
+            		    	<lI><?=$this->html->link('Beurtrol Districtsmedewerkers '.$value->districtscode.' '.$value->district.' ('.date('Y', $value->Startdatum->sec).'-'.date('Y', $value->Einddatum->sec).')', 'lijsten/view/'.$value->type.'/'.$value->subtype.'/'.$value->districtscode.'/'.date('Y', $value->Startdatum->sec))?></lI>
+            			<?php }?>               
+            	   </ul>
             	</div>
             	<div class="col-md-6">
             			<div class="nav-header" style="font-size:larger;  margin-bottom: 9px; margin-left: 13px">Winterdienst</div>		
